@@ -33,7 +33,9 @@ block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
 chain(blocks::AbstractBlock...) = ChainBlock(blocks...)
-chain(blocks::Union{AbstractBlock, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
+# NOTE: this one only parse blocks with size
+chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
 chain(itr) = chain(itr...)
 
 # if not all matrix block, try to put the number of qubits.
@@ -59,7 +61,7 @@ chain() = @λ(n->chain(n))
 SubBlocks(c::ChainBlock) = c.blocks
 OccupiedLocations(c::ChainBlock) =
     unique(Iterators.flatten(OccupiedLocations(b) for b in subblocks(c)))
-chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks...)
 
 mat(c::ChainBlock) = mat(MatrixTrait(c), c)
 mat(::HasMatrix, c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))

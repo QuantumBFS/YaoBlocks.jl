@@ -6,7 +6,7 @@ using Test, YaoBase, YaoBlockTree, YaoArrayRegister
         kron(2, 1=>phase(0.1)))
 
     @test g isa ChainBlock{2, ComplexF64} # default type
-    @test g.blocks == [kron(2, X, Y), kron(2, 1=>phase(0.1))]
+    @test g.blocks == (kron(2, X, Y), kron(2, 1=>phase(0.1)))
     blks = [X, Y, Rx(0.3)]
     @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
@@ -22,7 +22,6 @@ end
     @test chain(control(4, 2, 1=>X), kron(1=>X)) |> nqubits == 4
     @test chain(control(4, 2, 1=>X), kron(4, 1=>X)) |> nqubits == 4
 end
-
 
 @testset "test operations" begin
     g = ChainBlock(
@@ -49,7 +48,7 @@ end
 
 @testset "test iteration" begin
     test_list = [X, Y, phase(0.1), rot(X, 0.0)]
-    g = ChainBlock(test_list)
+    g = ChainBlock(test_list...)
 
     for (src, tg) in zip(g, test_list)
         @test src == tg
