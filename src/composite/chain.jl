@@ -9,12 +9,20 @@ export ChainBlock, chain
 user defined blocks horizontically. It is a `Vector`
 like composite type.
 """
-struct ChainBlock{N, T, MT <: AbstractBlock{N, T}} <: CompositeBlock{N, T}
-    blocks::Vector{MT}
+struct ChainBlock{N, T, Blocks <: Tuple} <: CompositeBlock{N, T}
+    blocks::Blocks
 end
 
-ChainBlock(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(collect(AbstractBlock{N, T}, blocks))
-ChainBlock(c::ChainBlock{N, T, MT}) where {N, T, MT} = copy(c)
+BlockSize(c::ChainBlock) = BlockSize(c.blocks...)
+MatrixTrait(c::ChainBlock) = MatrixTrait(c.blocks...)
+ChainBlock(blocks::Tuple) = ChainBlock(BlockSize(blocks...), MatrixTrait(blocks...), blocks)
+ChainBlock(::NormalSize{N}, ::HasMatrix{N, T}, blocks::Tuple) where {N, T} =
+    ChainBlock{N, T, typeof(blocks)}(blocks)
+ChainBlock(::UnkownSize, ::MatrixTrait, blocks) =
+    ChainBlock{UnkownSize, Any, typeof(blocks)}(blocks)
+
+ChainBlock(blocks::AbstractBlock...) = ChainBlock(blocks)
+ChainBlock(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(c.blocks)
 
 """
     chain(blocks...)
@@ -24,9 +32,9 @@ Return a [`ChainBlock`](@ref) which chains a list of blocks with same
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
-chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
-chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
-chain(list::Vector) = ChainBlock(list)
+chain(blocks::AbstractBlock...) = ChainBlock(blocks...)
+chain(blocks::Union{AbstractBlock, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
+chain(itr) = chain(itr...)
 
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
@@ -53,7 +61,9 @@ OccupiedLocations(c::ChainBlock) =
     unique(Iterators.flatten(OccupiedLocations(b) for b in subblocks(c)))
 chsubblocks(pb::ChainBlock, blocks) = ChainBlock(blocks)
 
-mat(c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(c::ChainBlock) = mat(MatrixTrait(c), c)
+mat(::HasMatrix, c::ChainBlock) = prod(x->mat(x), reverse(c.blocks))
+mat(::MatrixUnkown, c::ChainBlock) = error("this chain block does not have a matrix representation")
 
 function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks
@@ -68,12 +78,11 @@ function Base.:(==)(lhs::ChainBlock{N, T}, rhs::ChainBlock{N, T}) where {N, T}
     (length(lhs.blocks) == length(rhs.blocks)) && all(lhs.blocks .== rhs.blocks)
 end
 
-Base.copy(c::ChainBlock) = ChainBlock{N, T, MT}(copy(c.blocks))
+Base.copy(c::ChainBlock) = ChainBlock(c)
 Base.similar(c::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T}(empty!(similar(c.blocks)))
 Base.getindex(c::ChainBlock, index) = getindex(c.blocks, index)
 Base.getindex(c::ChainBlock, index::Union{UnitRange, Vector}) = ChainBlock(getindex(c.blocks, index))
-Base.setindex!(c::ChainBlock{N}, val::AbstractBlock{N}, index::Integer) where N = (setindex!(c.blocks, val, index); c)
-Base.insert!(c::ChainBlock{N}, index::Integer, val::AbstractBlock{N}) where N = (insert!(c.blocks, index, val); c)
+
 Base.adjoint(blk::ChainBlock{N, T, MT}) where {N, T, MT} = ChainBlock{N, T, MT}(map(adjoint, reverse(subblocks(blk))))
 Base.lastindex(c::ChainBlock) = lastindex(c.blocks)
 ## Iterate contained blocks
@@ -81,14 +90,6 @@ Base.iterate(c::ChainBlock, st=1) = iterate(c.blocks, st)
 Base.length(c::ChainBlock) = length(c.blocks)
 Base.eltype(c::ChainBlock) = eltype(c.blocks)
 Base.eachindex(c::ChainBlock) = eachindex(c.blocks)
-Base.popfirst!(c::ChainBlock) = popfirst!(c.blocks)
-Base.pop!(c::ChainBlock) = pop!(c.blocks)
-Base.push!(c::ChainBlock{N}, m::AbstractBlock{N}) where N = (push!(c.blocks, m); c)
-Base.push!(c::ChainBlock{N}, f::Function) where N = (push!(c.blocks, f(N)); c)
-Base.append!(c::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (append!(c.blocks, list); c)
-Base.append!(c1::ChainBlock{N}, c2::ChainBlock{N}) where N = (append!(c1.blocks, c2.blocks); c1)
-Base.prepend!(c1::ChainBlock{N}, list::Vector{<:AbstractBlock{N}}) where N = (prepend!(c1.blocks, list); c1)
-Base.prepend!(c1::ChainBlock{N}, c2::ChainBlock{N}) where N = (prepend!(c1.blocks, c2.blocks); c1)
 
 YaoBase.isunitary(c::ChainBlock) = all(isunitary, c.blocks) || isunitary(mat(c))
 YaoBase.isreflexive(c::ChainBlock) = (iscommute(c.blocks...) && all(isreflexive, c.blocks)) || isreflexive(mat(c))

@@ -76,13 +76,16 @@ YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N =
 export MatrixTrait
 
 abstract type MatrixTrait end
-struct HasMatrix{N, T} end
-struct MatrixUnkown end
+struct HasMatrix{N, T} <: MatrixTrait end
+struct MatrixUnkown <: MatrixTrait end
 
 # NOTE: most blocks have matrix, use `HasMatrix` by default.
 #       this will error when `mat` is not defined anyway, no worries.
-MatrixTrait(x::AbstractBlock) where T = HasMatrix{nqubits(x), datatype(x)}()
+MatrixTrait(x::AbstractBlock) = HasMatrix{nqubits(x), datatype(x)}()
 
+MatrixTrait(xs::AbstractBlock...) = MatrixTrait(MatrixTrait.(xs)...)
+MatrixTrait(::HasMatrix{N, T}...) where {N, T} = HasMatrix{N, T}()
+MatrixTrait(::Union{HasMatrix, MatrixUnkown}...) = MatrixUnkown()
 
 """
     mat(blk)
@@ -120,6 +123,9 @@ struct UnkownSize <: BlockSize end
 BlockSize(x::AbstractBlock{N}) where N = NormalSize{N}()
 BlockSize(x::AbstractBlock{UnkownSize}) = UnkownSize()
 BlockSize(x::AbstractBlock{FullSize}) = FullSize()
+BlockSize(blocks::AbstractBlock...) = BlockSize(BlockSize.(blocks)...)
+BlockSize(::NormalSize{N}...) where N = NormalSize{N}()
+BlockSize(::BlockSize...) = UnkownSize()
 
 function YaoBase.nqubits(x::AbstractBlock{UnkownSize})
     throw(MethodError(nqubits, (x, )))

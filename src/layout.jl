@@ -129,6 +129,30 @@ print_block(io::IO, c::Daggered) = print_block(io, c.block)
 print_block(io::IO, f::FunctionBlock) = printstyled(io, "function: $(nameof(f.call!))"; bold=true, color=:green)
 
 
+function print_block(io::IO, c::Measure{0})
+    print(io, "mesaure(")
+    if c.collapseto !== nothing
+        print(io, "collapseto=", c.collapseto)
+    end
+
+    if c.remove
+        print(io, ", remove=true")
+    end
+    print(io, ")")
+end
+
+function print_block(io::IO, c::Measure)
+    print(io, "mesaure(", join(c.locations, ", "))
+    if c.collapseto !== nothing
+        print(io, "collapseto=", c.collapseto)
+    end
+
+    if c.remove
+        print(io, ", remove=true")
+    end
+    print(io, ")")
+end
+
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
     printstyled(io, "mathgate($(m.f); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
