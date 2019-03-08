@@ -112,7 +112,7 @@ Apply a block (of quantum circuit) to a quantum register.
 @interface apply!(r::AbstractRegister, b::AbstractBlock) = apply!(MatrixTrait(b), r, b)
 
 function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
-    mul!(r.state, mat(b), r)
+    mul!(r.state, mat(b), r.state)
     return r
 end
 
