@@ -60,46 +60,26 @@ end
     end
 end
 
-@testset "additional" begin
-    g = ChainBlock(X, Y)
-    push!(g, Z)
-    @test g[3] == Z
-
-    append!(g, [rot(X, 0.0), rot(Y, 0.0)])
-    @test g[4] == rot(X, 0.0)
-    @test g[5] == rot(Y, 0.0)
-
-    prepend!(g, [phase(0.1)])
-    @test g[1] == phase(0.1)
-    @test g[2] == X
-    @test g[end] == rot(Y, 0.0)
-    first = popfirst!(g)
-    last = pop!(g)
-    @test first == phase(0.1)
-    @test last == rot(Y, 0.0)
-    @test g == chain(1, [X, Y, Z, rot(X, 0.0)])
-end
-
-@testset "test addition" begin
-    g = ChainBlock(X, Y)
-    push!(g, Z)
-    @test g[3] == Z
-
-    append!(g, [rot(X, 0.0), rot(Y, 0.0)])
-    @test g[4] == rot(X, 0.0)
-    @test g[5] == rot(Y, 0.0)
-
-    prepend!(g, [phase(0.1)])
-    @test g[1] == phase(0.1)
-    @test g[2] == X
-    @test g[end] == rot(Y, 0.0)
-    first = popfirst!(g)
-    last = pop!(g)
-    @test first == phase(0.1)
-    @test last == rot(Y, 0.0)
-    @test g == chain(1, [X, Y, Z, rot(X, 0.0)])
-end
-
+# @testset "test addition" begin
+#     g = ChainBlock(X, Y)
+#     push!(g, Z)
+#     @test g[3] == Z
+#
+#     append!(g, [rot(X, 0.0), rot(Y, 0.0)])
+#     @test g[4] == rot(X, 0.0)
+#     @test g[5] == rot(Y, 0.0)
+#
+#     prepend!(g, [phase(0.1)])
+#     @test g[1] == phase(0.1)
+#     @test g[2] == X
+#     @test g[end] == rot(Y, 0.0)
+#     first = popfirst!(g)
+#     last = pop!(g)
+#     @test first == phase(0.1)
+#     @test last == rot(Y, 0.0)
+#     @test g == chain(1, [X, Y, Z, rot(X, 0.0)])
+# end
+#
 
 @testset "test inspect" begin
     # TODO: check traits when primitive blocks' traits are all defined

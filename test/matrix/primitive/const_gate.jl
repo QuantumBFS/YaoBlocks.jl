@@ -1,4 +1,4 @@
-using Test, YaoBlockTree, LuxurySparse, BitBasis
+using Test, YaoBase, YaoBlockTree, LuxurySparse, BitBasis
 
 @testset "test builtin gates" begin
 
