@@ -128,7 +128,7 @@ BlockSize(::NormalSize{N}...) where N = NormalSize{N}()
 BlockSize(::BlockSize...) = UnkownSize()
 
 function YaoBase.nqubits(x::AbstractBlock{UnkownSize})
-    throw(MethodError(nqubits, (x, )))
+    error("cannot inference the total number of qubits of given block of $(typeof(x))")
 end
 
 function YaoBase.nqubits(x::AbstractBlock{FullSize})
