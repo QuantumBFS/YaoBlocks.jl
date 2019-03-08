@@ -118,27 +118,3 @@ function Base.show(io::IO, it::OccupiedLocationsIt)
     end
     return
 end
-
-abstract type MatrixTrait end
-struct HasMatrix{N, T} end
-struct MatrixUnkown end
-
-# NOTE: most blocks have matrix, use `HasMatrix` by default.
-#       this will error when `mat` is not defined anyway, no worries.
-MatrixTrait(x::AbstractBlock) where T = HasMatrix{nqubits(x), datatype(x)}()
-
-apply!(r::AbstractRegister, b::AbstractBlock) = apply!(MatrixTrait(b), r, b)
-
-function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
-    mul!(r.state, mat(b), r)
-    return r
-end
-
-function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
-    if applicable(mat, b)
-        mul!(r.state, mat(b), r)
-    else
-        throw(MethodError(apply!, (r, b)))
-    end
-    return r
-end

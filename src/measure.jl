@@ -1,4 +1,6 @@
-abstract type AbstractMeasure <: AbstractBlock end
+abstract type AbstractMeasure <: AbstractBlock{UnkownSize, Any} end
+
+MatrixTrait(::AbstractMeasure) = MatrixUnkown()
 
 """
     Measure <: AbstractMeasure

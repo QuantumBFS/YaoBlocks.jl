@@ -6,14 +6,16 @@ include("traits.jl")
 include("abstract_block.jl")
 include("block_map.jl")
 
+include("routines.jl") # contains routines to generate matrices for quantum gates.
+include("primitive/primitive.jl")
+include("composite/composite.jl")
+
 # concrete blocks
-include("matrix/matrix.jl")
 # include("symbolic/symbolic.jl")
 
-include("measure.jl")
 # include("sequencial.jl")
+include("measure.jl")
 include("function.jl")
-
 include("parse_block.jl")
 
 # printings and tools to manipulate

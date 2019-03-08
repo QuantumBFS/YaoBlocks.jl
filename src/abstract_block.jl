@@ -8,14 +8,7 @@ import YaoBase: @interface
 
 Abstract type for quantum circuit blocks.
 """
-abstract type AbstractBlock end
-
-"""
-    apply!(register, block)
-
-Apply a block (of quantum circuit) to a quantum register.
-"""
-@interface apply!(::AbstractRegister, ::AbstractBlock)
+abstract type AbstractBlock{N, T} end
 
 """
     |>(register, blk)
@@ -55,3 +48,83 @@ print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
 
 # return itself by default
 Base.copy(x::AbstractBlock) = x
+
+
+# YaoBase interface
+YaoBase.nqubits(::Type{MT}) where {N, MT <: AbstractBlock{N}} = N
+YaoBase.nqubits(x::AbstractBlock{N}) where N = nqubits(typeof(x))
+YaoBase.datatype(x::AbstractBlock{N, T}) where {N, T} = T
+YaoBase.datatype(::Type{<:AbstractBlock{N, T}}) where {N, T} = T
+
+# properties
+for each_property in [:isunitary, :isreflexive, :ishermitian]
+    @eval YaoBase.$each_property(x::AbstractBlock) = $each_property(mat(x))
+    @eval YaoBase.$each_property(::Type{T}) where T <: AbstractBlock = $each_property(mat(T))
+end
+
+function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N
+    if length(intersect(occupied_locations(op1), occupied_locations(op2))) == 0
+        return true
+    else
+        return iscommute(mat(op1), mat(op2))
+    end
+end
+
+YaoBase.iscommute(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where N =
+    iscommute_fallback(op1, op2)
+
+export MatrixTrait
+
+abstract type MatrixTrait end
+struct HasMatrix{N, T} end
+struct MatrixUnkown end
+
+# NOTE: most blocks have matrix, use `HasMatrix` by default.
+#       this will error when `mat` is not defined anyway, no worries.
+MatrixTrait(x::AbstractBlock) where T = HasMatrix{nqubits(x), datatype(x)}()
+
+
+"""
+    mat(blk)
+
+Returns the matrix form of given block.
+"""
+@interface mat(x::AbstractBlock) = mat(MatrixTrait(x), x)
+mat(::HasMatrix, x::AbstractBlock) =
+    error("You need to define the matrix of $(typeof(x)), or declare it does not have a matrix")
+mat(::MatrixUnkown, x::AbstractBlock) = error("$(typeof(x)) does not have a matrix")
+
+"""
+    apply!(register, block)
+
+Apply a block (of quantum circuit) to a quantum register.
+"""
+@interface apply!(r::AbstractRegister, b::AbstractBlock) = apply!(MatrixTrait(b), r, b)
+
+function apply!(::HasMatrix, r::ArrayReg, b::AbstractBlock)
+    mul!(r.state, mat(b), r)
+    return r
+end
+
+function apply!(::MatrixUnkown, r::AbstractRegister, b::AbstractBlock)
+    error("method apply! is not defined for $(typeof(b)), and circuit block $(typeof(b)) does not have a matrix representation.")
+end
+
+export BlockSize
+
+abstract type BlockSize end
+struct NormalSize{N} <: BlockSize end
+struct FullSize <: BlockSize end
+struct UnkownSize <: BlockSize end
+
+BlockSize(x::AbstractBlock{N}) where N = NormalSize{N}()
+BlockSize(x::AbstractBlock{UnkownSize}) = UnkownSize()
+BlockSize(x::AbstractBlock{FullSize}) = FullSize()
+
+function YaoBase.nqubits(x::AbstractBlock{UnkownSize})
+    throw(MethodError(nqubits, (x, )))
+end
+
+function YaoBase.nqubits(x::AbstractBlock{FullSize})
+    throw(MethodError(nqubits, (x, )))
+end
