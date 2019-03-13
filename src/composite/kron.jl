@@ -99,7 +99,7 @@ Return a lambda, which will take the total number of qubits as input.
 Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = @λ(n->kron(n, blocks))
 
-OccupiedLocations(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, OccupiedLocations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
+occupied_locations(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locations(b)) for (i, b) in zip(k.addrs, subblocks(k)))
 subblocks(x::KronBlock) = SubBlockIt(x.blocks)
 chsubblocks(pb::KronBlock{N}, blocks) where N = KronBlock{N}(pb.addrs, blocks)
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]

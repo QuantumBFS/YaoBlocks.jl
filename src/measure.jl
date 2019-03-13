@@ -1,10 +1,6 @@
 export measure
 
-abstract type AbstractMeasure <: AbstractBlock{UnkownSize, Any} end
-
-MatrixTrait(::AbstractMeasure) = MatrixUnkown()
-
-mutable struct Measure{K} <: AbstractMeasure
+mutable struct Measure{K} <: AbstractBlock{AtLeast{K}, Any}
     locations::NTuple{K, Int}
     collapseto::Union{Int, Nothing}
     remove::Bool

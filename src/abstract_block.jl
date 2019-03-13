@@ -1,6 +1,6 @@
 export AbstractBlock
 
-using YaoBase
+using YaoBase, YaoArrayRegister
 import YaoBase: @interface
 
 export nqubits,
@@ -58,8 +58,6 @@ Base.copy(x::AbstractBlock) = x
 
 
 # YaoBase interface
-YaoBase.nqubits(::Type{MT}) where {N, MT <: AbstractBlock{N}} = N
-YaoBase.nqubits(x::AbstractBlock{N}) where N = nqubits(typeof(x))
 YaoBase.datatype(x::AbstractBlock{N, T}) where {N, T} = T
 YaoBase.datatype(::Type{<:AbstractBlock{N, T}}) where {N, T} = T
 
@@ -125,19 +123,112 @@ export BlockSize
 abstract type BlockSize end
 struct NormalSize{N} <: BlockSize end
 struct FullSize <: BlockSize end
-struct UnkownSize <: BlockSize end
+struct AtLeast{N} <: BlockSize end
 
 BlockSize(x::AbstractBlock{N}) where N = NormalSize{N}()
-BlockSize(x::AbstractBlock{UnkownSize}) = UnkownSize()
 BlockSize(x::AbstractBlock{FullSize}) = FullSize()
 BlockSize(blocks::AbstractBlock...) = BlockSize(BlockSize.(blocks)...)
 BlockSize(::NormalSize{N}...) where N = NormalSize{N}()
-BlockSize(::BlockSize...) = UnkownSize()
 
-function YaoBase.nqubits(x::AbstractBlock{UnkownSize})
-    error("cannot inference the total number of qubits of given block of $(typeof(x))")
+_loose_bound(::Type{<:NormalSize}) = AtLeast
+_loose_bound(::Type{<:AtLeast}) = FullSize
+_loose_bound(::Type{<:FullSize}) = error("FullSize can not be loosed")
+
+@inline find_blocksize(blocksizes) = find_blocksize(NormalSize, blocksizes)
+@inline function find_blocksize(::Type{T}, blocksizes) where {T <: BlockSize}
+    k = findfirst(x->x <: T, blocksizes)
+    if k !== Nothing
+        return blocksizes[k]
+    else
+        return find_blocksize(_loose_bound(T), blocksizes)
+    end
 end
 
-function YaoBase.nqubits(x::AbstractBlock{FullSize})
-    throw(MethodError(nqubits, (x, )))
+@inline function find_blocksize(::Type{FullSize}, blocksizes)
+    k = findfirst(x->x <: FullSize, blocksizes)
+    if k === Nothing
+        error("no valid type of block size")
+    else
+        return blocksizes[k]
+    end
+end
+
+@generated function BlockSize(blocksizes::BlockSize...)
+    return BlockSize(blocksizes)
+end
+
+@generated function BlockSize(blocksizes::Tuple)
+    return BlockSize(blocksizes.parameters)
+end
+
+function BlockSize(blocksizes)
+    # NOTE: we follow the following rules
+    #       1. if there is NormalSize{N}, N = N
+    #       2. elseif there is AtLeast{N}, N = AtLeast{N}
+    #       3. elseif there is FullSize, N = FullSize
+    #       4. else, error
+
+    # try to find the first valid size
+    expect = find_blocksize(blocksizes)
+
+    # check if this list of size is match
+    for each in blocksizes
+        if !isequal(expect, each)
+            error("size mismatch, expect block with $(expect) qubits, got $each")
+        end
+    end
+    return expect
+end
+
+
+YaoBase.nqubits(::Type{MT}) where {N, MT <: AbstractBlock{N}} = N
+YaoBase.nqubits(::AbstractBlock{N}) where N = N
+YaoBase.nqubits(::AbstractBlock{FullSize}) = FullSize()
+YaoBase.nqubits(::AbstractBlock{AtLeast{N}}) where N = AtLeast{N}()
+YaoBase.nqubits(::NormalSize{N}) where N = N
+YaoBase.nqubits(x::BlockSize) = x
+YaoBase.nqubits(::Type{<:NormalSize{N}}) where N = N
+YaoBase.nqubits(::Type{T}) where T <: BlockSize = T
+
+Base.isequal(::NormalSize{N}, ::NormalSize{N}) where N = true
+Base.isequal(::NormalSize, ::NormalSize) = false
+Base.isequal(::NormalSize, ::FullSize) = true
+Base.isequal(::FullSize, ::NormalSize) = true
+Base.isequal(::NormalSize{N}, ::AtLeast{K}) where {N, K} = N > K
+Base.isequal(::AtLeast{K}, ::NormalSize{N}) where {N, K} = N > K
+Base.isequal(::AtLeast, ::FullSize) = true
+Base.isequal(::FullSize, ::AtLeast) = true
+
+
+@generated function assert_blocks(list::Tuple)
+    return assert_blocks(list.parameters)
+end
+
+function assert_blocks(list)
+    for (k, each) in enumerate(list)
+        if !(each <: AbstractBlock)
+            error("Expect a block of circuit, got $each at index [$k]")
+        end
+    end
+    return nothing
+end
+
+@generated function find_datatype(list::Tuple)
+    return find_datatype(list.parameters)
+end
+
+function find_datatype(list_of_block_types)
+    Ts = map(datatype, list_of_block_types)
+    iT = findfirst(x->x !== Any, Ts)
+    iT === Nothing && error("cannot find valid data type")
+
+    T = Ts[iT] # assign the first concrete data type
+    for (k, each) in enumerate(Ts)
+        if T === each || each === Any
+            continue
+        else
+            error("expect $T got $each at $k")
+        end
+    end
+    return T
 end
