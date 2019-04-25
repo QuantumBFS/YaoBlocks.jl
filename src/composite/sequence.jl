@@ -8,6 +8,7 @@ subblocks(seq::Sequence) = filter(x->x isa AbstractBlock, seq.blocks)
 chsubblocks(pb::Sequence, blocks::Vector) = Sequence(blocks)
 
 function apply!(reg::ArrayReg, seq::Sequence)
+    _check_size(reg, seq)
     for x in seq.blocks
         reg |> x
     end

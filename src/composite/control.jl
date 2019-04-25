@@ -125,6 +125,7 @@ cnot(ctrl_locs, location::Int) = @λ(n -> cnot(n, ctrl_locs, location))
 mat(c::ControlBlock{N, BT, C}) where {N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(c.content), c.locs)
 
 function apply!(r::ArrayReg, c::ControlBlock)
+    _check_size(r, c)
     instruct!(matvec(r.state), mat(c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
@@ -134,6 +135,7 @@ for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
 
     @eval function apply!(r::ArrayReg, c::ControlBlock{N, <:$GT}) where N
+        _check_size(r, c)
         instruct!(matvec(r.state), Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
         return r
     end

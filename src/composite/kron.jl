@@ -120,6 +120,7 @@ function mat(k::KronBlock{N}) where N
 end
 
 function apply!(r::ArrayReg, k::KronBlock)
+    _check_size(r, k)
     for (locs, block) in zip(k.locs, k.blocks)
         _instruct!(state(r), block, Tuple(locs:locs+nqubits(block)-1))
     end

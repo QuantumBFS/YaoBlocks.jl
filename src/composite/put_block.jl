@@ -43,7 +43,7 @@ mat(pb::PutBlock{N, 1}) where N = u1mat(N, mat(pb.content), pb.locs...)
 mat(pb::PutBlock{N, C}) where {N, C} = unmat(N, mat(pb.content), pb.locs)
 
 function apply!(r::ArrayReg, pb::PutBlock{N}) where N
-    N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+    _check_size(r, pb)
     instruct!(matvec(r.state), mat(pb.content), pb.locs)
     return r
 end
@@ -52,7 +52,7 @@ end
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, <:$GT, T}) where {N, C, T}
-        N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
+        _check_size(r, pb)
         instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)
         return r
     end

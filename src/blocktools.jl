@@ -47,7 +47,7 @@ Return a [`ChainBlock`](@ref) with all block of `block_type` in root.
 #@interface expect(op::AbstractBlock, r::AbstractRegister) = r' * apply!(copy(r), op)
 
 #expect(op::AbstractBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
-#expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
+expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op).*dropdims(dm.state, dims=3))
 
 """
     expect(op::AbstractBlock, reg::AbstractRegister{B}) -> Vector
@@ -55,7 +55,7 @@ Return a [`ChainBlock`](@ref) with all block of `block_type` in root.
 
 expectation value of an operator.
 """
-function expect(op::AbstractBlock, dm::DensityMatrix{B}) where B
+@interface function expect(op::AbstractBlock, dm::DensityMatrix{B}) where B
     mop = mat(op)
     [tr(view(dm.state,:,:,i)*mop) for i=1:B]
 end
@@ -69,19 +69,19 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where B
     dropdims(sum(A.*C, dims=1), dims=1) |> conj
 end
 
- function expect(op::AddBlock, reg::AbstractRegister)
+function expect(op::Sum, reg::AbstractRegister)
     sum(opi->expect(opi, reg), op)
 end
 
- function expect(op::AbstractScale, reg::AbstractRegister)
-    factor(op)*expect(parent(op), reg)
+function expect(op::Scale, reg::AbstractRegister)
+    op.alpha*expect(content(op), reg)
 end
 
-expect(op::AddBlock, reg::AbstractRegister{1}) = invoke(expect, Tuple{AddBlock, AbstractRegister}, op, reg)
-expect(op::AbstractScale, reg::AbstractRegister{1}) = invoke(expect, Tuple{AbstractScale, AbstractRegister}, op, reg)
+expect(op::Sum, reg::AbstractRegister{1}) = invoke(expect, Tuple{Sum, AbstractRegister}, op, reg)
+expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale, AbstractRegister}, op, reg)
 
-for FUNC in [:measure!, :measure_collapseto!, :measure_remove!]
-    @eval function $FUNC(op::AbstractBlock, reg::AbstractRegister; kwargs...) where B
-        $FUNC(eigen!(mat(op) |> Matrix), reg; kwargs...)
+for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
+    @eval function YaoBase.$FUNC(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where B
+        $FUNC(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
     end
 end

@@ -48,6 +48,7 @@ mat(rb::RepeatedBlock{N}) where N = hilbertkron(N, fill(mat(rb.content), length(
 mat(rb::RepeatedBlock{N, 0, GT, T}) where {N, GT, T} = IMatrix{1<<N, T}()
 
 function apply!(r::AbstractRegister, rp::RepeatedBlock)
+    _check_size(r, rp)
     m  = mat(rp.content)
     for addr in rp.locs
         instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))
