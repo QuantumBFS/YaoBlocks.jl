@@ -26,11 +26,19 @@ instance itself.
 """
 chain(blocks::AbstractBlock{N, T}...) where {N, T} = ChainBlock(blocks...)
 chain(blocks::Union{AbstractBlock{N, T}, Function}...) where {N, T} = chain(map(x->parse_block(N, x), blocks)...)
-chain(list::Vector) = ChainBlock(list)
+
+function chain(list::Vector)
+    for each in list # check type
+        each isa AbstractBlock || error("expect a block, got $(typeof(each))")
+    end
+    N = nqubits(first(list))
+    T = datatype(first(list))
+    return ChainBlock(Vector{AbstractBlock{N, T}}(list))
+end
 
 # if not all matrix block, try to put the number of qubits.
 chain(n::Int, blocks...) = chain(map(x->parse_block(n, x), blocks)...)
-chain(n::Int, itr) = chain(map(x->parse_block(n, x), itr)...)
+chain(n::Int, itr) = isempty(itr) ? chain(n) : chain(map(x->parse_block(n, x), itr)...)
 chain(n::Int, f::Function) = chain(n, parse_block(n, f))
 function chain(n::Int, block::AbstractBlock)
     @assert n == nqubits(block) "number of qubits mismatch"
