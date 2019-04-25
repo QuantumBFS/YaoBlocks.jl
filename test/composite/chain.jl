@@ -26,6 +26,8 @@ using Test, YaoBase, YaoBlocks, YaoArrayRegister
     list = []
     push!(list, X)
     @test chain(list) == chain(X)
+
+    @test chain(4, []) == chain(4)
 end
 
 @testset "test chain" begin
