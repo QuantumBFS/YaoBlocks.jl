@@ -12,7 +12,7 @@ struct RepeatedBlock{N, C, GT <: AbstractBlock, T} <: AbstractContainer{GT, N, T
 end
 
 function RepeatedBlock{N}(block::AbstractBlock{M, T}, locs::NTuple{C, Int}) where {N, M, T, C}
-    @assert_locs N Tuple(i:i+M-1 for i in locs)
+    @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
     return RepeatedBlock{N, C, typeof(block), T}(block, locs)
 end
 

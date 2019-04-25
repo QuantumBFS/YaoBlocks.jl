@@ -19,7 +19,7 @@ function KronBlock{N, T}(locs::Vector{Int}, blocks::Vector{MT}) where {N, T, MT<
     perm = sortperm(locs)
     permute!(locs, perm)
     permute!(blocks, perm)
-    @assert_locs N collect(i:i+nqubits(b)-1 for (i, b) in zip(locs, blocks))
+    @assert_locs_safe N collect(i:i+nqubits(b)-1 for (i, b) in zip(locs, blocks))
 
     slots = zeros(Int, N)
     for (i, each) in enumerate(locs)

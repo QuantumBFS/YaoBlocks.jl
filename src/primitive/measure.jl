@@ -14,7 +14,7 @@ mutable struct Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
     remove::Bool
     results::Vector{Int}
     function Measure{N, K, OT}(operator, locations, collapseto, remove) where {N, K, OT}
-        locations isa AllLocs || @assert_locs N locations
+        locations isa AllLocs || @assert_locs_safe N locations
         if collapseto !== nothing && remove == true
             error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
         end
@@ -22,8 +22,14 @@ mutable struct Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
     end
 end
 
-function Measure(n::Int; operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false) where OT
-    Measure{n, length(locs), OT}(operator, tuple(locs...), collapseto, remove)
+@interface nqubits_measured(::Measure{N, K}) where {N, K} = K
+
+function Measure(n::Int; operator::OT=ComputationalBasis(), locs, collapseto=nothing, remove=false) where OT
+    if locs isa AllLocs
+        Measure{n, n, OT}(operator, locs, collapseto, remove)
+    else
+        Measure{n, length(locs), OT}(operator, tuple(locs...), collapseto, remove)
+    end
 end
 
 Measure(;locs=AllLocs(), operator=ComputationalBasis(), collapseto=nothing, remove=false) where K = @λ(n->Measure(n; locs=locs, operator=operator, collapseto=collapseto, remove=remove))
