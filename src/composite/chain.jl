@@ -59,7 +59,7 @@ subblocks(c::ChainBlock) = c.blocks
 occupied_locs(c::ChainBlock) =
     unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))
 
-chsubblocks(pb::ChainBlock, blocks::Vector{<:AbstractBlock}) = ChainBlock(blocks)
+chsubblocks(pb::ChainBlock{N, T}, blocks::Vector{<:AbstractBlock}) where {N, T} = length(blocks) == 0 ? ChainBlock{N, T}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
 mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))

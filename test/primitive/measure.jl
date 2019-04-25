@@ -27,3 +27,36 @@ end
     @test_throws ErrorException Measure(5, (1, 2); collapseto=bit"11", remove=true)
     @test_throws ErrorException mat(Measure(5, (1, 2); collapseto=bit"11"))
 end
+
+
+@testset "op-measures" begin
+    reg = rand_state(6, 10)
+    op = repeat(3, X)
+
+     # measure!
+    reg2 = reg |> copy
+    res = measure!(op, reg2, 2:4)
+    res2 = measure!(op, reg2, 2:4)
+    @test size(res) == (10,)
+    @test res2 == res
+
+     # measure_reset!
+    reg2 = reg |> copy
+    res = measure_reset!(op, reg2, 2:4)
+    reg2 |> repeat(6, H, 2:4)
+    res2 = measure_reset!(op, reg2, 2:4)
+    @test size(res) == (10,) == size(res2)
+    @test all(res2 .== 1)
+
+     # measure_remove!
+    reg2 = reg |> copy
+    res = measure_remove!(op, reg2, 2:4)
+    reg2 |> repeat(3, H, 2:3)
+    @test size(res) == (10,)
+    @test nqubits(reg2) == 3
+
+     reg = repeat(register([1,-1]/sqrt(2.0)), 10)
+    @test measure!(X, reg) |> mean ≈ -1
+    reg = repeat(register([1.0,0]), 1000)
+    @test abs(measure!(X, reg) |> mean) < 0.1
+end	end
