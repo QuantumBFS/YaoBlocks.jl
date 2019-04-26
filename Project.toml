@@ -18,6 +18,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 YaoArrayRegister = "e600142f-9330-5003-8abb-0ebd767abc51"
 YaoBase = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
 
+[compat]
+YaoBase = ">=0.9.1"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
