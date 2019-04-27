@@ -50,7 +50,7 @@ function apply!(r::AbstractRegister, c::Concentrator)
     _check_size(r, c)
     focus!(r, occupied_locs(c))
     apply!(r, c.content)
-    relax!(r, occupied_locs(c)) # to_nactive=nqubits(r)
+    relax!(r, occupied_locs(c), to_nactive=nqubits(c))
     return r
 end
 
