@@ -7,7 +7,7 @@ export TimeEvolution, time_evolve
 
 TimeEvolution, where GT is block type. input matrix should be hermitian.
 
-Note:
+!!!note:
 `TimeEvolution` contructor does not check hermicity by default for performance consideration, but it is in fact required.
 Turn on the check by specifying optional parameter `check_hermicity = true`.
 """
