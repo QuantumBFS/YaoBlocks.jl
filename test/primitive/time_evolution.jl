@@ -13,27 +13,30 @@ end
 
 const hm = heisenberg(4)
 
+@testset "test imaginary time evolution" begin
+    tei = TimeEvolution(hm, 0.2im)
+    r = rand_state(4)
+    r1 = copy(r) |> tei
+    @test exp(Matrix(mat(hm)) * 0.2) * r.state ≈ r1.state
+
+    @test applymatrix(tei) ≈ mat(tei)
+    @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
+    @test !isunitary(tei)
+    @test !isunitary(tei |> mat)
+end
+
 @testset "test time evolution" begin
     te = TimeEvolution(hm, 0.2)
 
     r = rand_state(4)
     r1 = copy(r) |> te
-    @test exp(Matrix(mat(hm)) * 0.2) * r.state ≈ r1.state
+    @test exp(Matrix(mat(hm)) * -0.2im) * r.state ≈ r1.state
     @test applymatrix(adjoint(te)) ≈ applymatrix(te)'
 
     @test applymatrix(te) ≈ mat(te)
     @test isunitary(te)
+    @test isunitary(te |> mat)
     cte = copy(te)
     @test cte == te
 end
 
-@testset "test imaginary time evolution" begin
-    tei = TimeEvolution(hm, 0.2im)
-    r = rand_state(4)
-    r1 = copy(r) |> tei
-    @test exp(Matrix(mat(hm)) * 0.2im) * r.state ≈ r1.state
-
-    @test applymatrix(tei) ≈ mat(tei)
-    @test applymatrix(adjoint(tei)) ≈ applymatrix(tei)'
-    @test !isunitary(tei)
-end
