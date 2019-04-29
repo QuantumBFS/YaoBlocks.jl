@@ -25,3 +25,5 @@ g[3] = I2
 @test isreflexive(g) == isreflexive(mat(g))
 @test isunitary(g) == isunitary(mat(g))
 @test length(g) == 3
+
+@test cache_key(g) == [cache_key(g[1]), cache_key(g[2]), cache_key(g[3])]
