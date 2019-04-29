@@ -38,7 +38,7 @@ YaoBase.isunitary(::PauliString) = true
 
 Base.copy(ps::PauliString) = PauliString(copy(ps.blocks))
 Base.getindex(ps::PauliString, x) = getindex(ps.blocks, x)
-Base.lastindex(ps::PauliString, x) = lastindex(ps.blocks, x)
+Base.lastindex(ps::PauliString) = lastindex(ps.blocks)
 Base.iterate(ps::PauliString) = iterate(ps.blocks)
 Base.iterate(ps::PauliString, st) = iterate(ps.blocks, st)
 Base.length(ps::PauliString) = length(ps.blocks)
