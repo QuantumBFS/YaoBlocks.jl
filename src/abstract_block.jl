@@ -242,7 +242,6 @@ Dispatch parameters in collection to block tree `x`.
 @interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
-    println(dp.loc)
     @assert (it isa Symbol || length(it) == dp.loc) "expect $(nparameters(x)) parameters, got $(length(it))"
     return res
 end
