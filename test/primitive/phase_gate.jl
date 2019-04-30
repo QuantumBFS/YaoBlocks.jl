@@ -29,6 +29,11 @@ end
 
 @testset "test dispatch" begin
     @test dispatch!(phase(0.1), 0.3) == phase(0.3)
+
+    @testset "test $op" for op in [+, -, *, /]
+        @test dispatch!(op, phase(0.1), π) == phase(op(0.1, π))
+    end
+
     @test_throws AssertionError dispatch!(phase(0.1), (0.2, 0.3))
 end
 
