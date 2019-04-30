@@ -19,8 +19,8 @@ jobs:
       julia: 1.1
       os: linux
       script:
-        - julia --code-coverage=user --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-        - julia --code-coverage=user --project=docs/ docs/make.jl
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl
       name: "HTML"
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
