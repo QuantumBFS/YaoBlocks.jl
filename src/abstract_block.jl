@@ -216,6 +216,11 @@ function consume!(d::Dispatcher{<:Symbol}, n::Int)
     d.params
 end
 
+function consume!(d::Dispatcher{<:Number}, n::Int)
+    n == 1 && return d.params
+    error("do not have enough parameters to consume")
+end
+
 """
     dispatch!(x::AbstractBlock, collection)
 
@@ -230,10 +235,11 @@ Dispatch parameters in collection to block tree `x`.
 end
 
 @interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
+    @assert (it isa Symbol || length(it) == nparameters(x)) "expect $(nparameters(x)) parameters, got $(length(it))"
+
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
-    @assert (it isa Symbol || length(it) == dp.loc) "expect $(nparameters(x)) parameters, got $(length(it))"
-    res
+    return res
 end
 
 dispatch!(x::AbstractBlock, it) = dispatch!(nothing, x, it)
