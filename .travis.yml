@@ -16,7 +16,7 @@ notifications:
 jobs:
   include:
     - stage: "DocTest"
-      julia: 1.1
+      julia: 1.1 # we only do doc test on latest stable release
       os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
