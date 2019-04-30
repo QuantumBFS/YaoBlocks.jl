@@ -130,7 +130,7 @@ Set the parameters of `block`.
 """
 @interface setiparams!(x::AbstractBlock, args...) = x
 
-setiparams!(x::AbstractBlock, it::Union{Tuple, Vector, Base.Generator}) = setiparams!(x, it...)
+setiparams!(x::AbstractBlock, it::Union{Tuple, AbstractArray, Base.Generator}) = setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) = error("setparams!(x, θ...) is not implemented")
 setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
 
@@ -221,11 +221,6 @@ function consume!(d::Dispatcher{<:Number}, n::Int)
     error("do not have enough parameters to consume")
 end
 
-"""
-    dispatch!(x::AbstractBlock, collection)
-
-Dispatch parameters in collection to block tree `x`.
-"""
 @interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it::Dispatcher)
     setiparams!(f, x, consume!(it, niparams(x)))
     for each in subblocks(x)
@@ -234,11 +229,20 @@ Dispatch parameters in collection to block tree `x`.
     return x
 end
 
-@interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
-    @assert (it isa Symbol || length(it) == nparameters(x)) "expect $(nparameters(x)) parameters, got $(length(it))"
+"""
+    dispatch!(x::AbstractBlock, collection)
 
+Dispatch parameters in collection to block tree `x`.
+
+!!! note
+
+    it will try to dispatch the parameters in collection first.
+"""
+@interface function dispatch!(f::Union{Function, Nothing}, x::AbstractBlock, it)
     dp = Dispatcher(it)
     res = dispatch!(f, x, dp)
+    println(dp.loc)
+    @assert (it isa Symbol || length(it) == dp.loc) "expect $(nparameters(x)) parameters, got $(length(it))"
     return res
 end
 
