@@ -90,6 +90,7 @@ include("repeated.jl")
 include("concentrator.jl")
 include("reduce.jl")
 include("pauli_strings.jl")
+include("ancilla.jl")
 
 chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
 chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
