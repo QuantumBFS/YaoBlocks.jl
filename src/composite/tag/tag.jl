@@ -9,10 +9,14 @@ but tag the block with some extra information.
 abstract type TagBlock{BT, N, T} <: AbstractContainer{BT, N, T} end
 
 # forward content properties
-getiparams(x::TagBlock) = getiparams(content(x))
 cache_key(tb::TagBlock) = cache_key(content(tb))
 occupied_locs(x::TagBlock) = occupied_locs(content(x))
 
+dispatch!(x::TagBlock, args...) = dispatch!(content(x), args...)
+dispatch!(f::Function, x::TagBlock, args...) = dispatch!(f, content(x), args...)
+
+popdispatch!(x::TagBlock, args...) = popdispatch!(content(x), args...)
+popdispatch!(f::Function, x::TagBlock, args...) = popdispatch!(f, content(x), args...)
 
 Base.:(==)(a::TB, b::TB) where {TB<:TagBlock} = content(a) == content(b)
 Base.length(x::TagBlock) = length(content(x))
