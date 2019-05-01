@@ -218,6 +218,7 @@ end
 
 function consume!(d::Dispatcher{<:Number}, n::Int)
     d.loc += n
+    println("n: ", n)
     n == 1 && return d.params
     error("do not have enough parameters to consume")
 end
