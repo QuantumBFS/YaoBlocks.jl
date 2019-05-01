@@ -18,4 +18,3 @@ end
 @test parameters(MockedTag(Rx(0.1))) == [0.1]
 
 @test occupied_locs(MockedTag(chain(3, put(1=>X), put(3=>X)))) == occupied_locs(chain(3, put(1=>X), put(3=>X)))
-@test collect(MockedTag(chain(X, Y, Z))) == collect(chain(X, Y, Z))
