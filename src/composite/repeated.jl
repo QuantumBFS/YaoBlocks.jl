@@ -92,7 +92,7 @@ function apply!(r::AbstractRegister, rp::RepeatedBlock)
     _check_size(r, rp)
     m  = mat(rp.content)
     for addr in rp.locs
-        instruct!(matvec(r.state), mat(rp.content), Tuple(addr:addr+nqubits(rp.content)-1))
+        instruct!(matvec(r.state), m, Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
 end
