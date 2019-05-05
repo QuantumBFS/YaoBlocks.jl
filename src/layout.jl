@@ -161,6 +161,7 @@ color(::Type{<:MathGate}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
+color(::Type{<:GeneralMatrixBlock}) = :red
 
 # color(::Type{T}) where {T <: PauliString} = :cyan
 # color(::Type{T}) where {T <: Sequential} = :blue
@@ -178,6 +179,10 @@ print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Prod) = printstyled(io, "prod"; bold=true, color=color(ChainBlock))
 print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
 print_block(io::IO, c::TagBlock) = nothing
+print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
+print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT} = 
+    printstyled(io, "Measure($N; operator=$(c.operator), ",
+        "locs=$(c.locations)...)")
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N

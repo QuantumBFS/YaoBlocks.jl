@@ -3,7 +3,6 @@ export Measure
 
 """
     Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
-    Measure(n::Int; operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
 
 Measure operator.
 """
@@ -24,7 +23,12 @@ end
 
 @interface nqubits_measured(::Measure{N, K}) where {N, K} = K
 
-function Measure(n::Int; operator::OT=ComputationalBasis(), locs, collapseto=nothing, remove=false) where OT
+"""
+    Measure(n::Int; operator=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false)
+
+Create a `Measure` block with number of qubits `n`.
+"""
+function Measure(n::Int; operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false) where OT
     if locs isa AllLocs
         Measure{n, n, OT}(operator, locs, collapseto, remove)
     else
