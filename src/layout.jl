@@ -173,7 +173,7 @@ print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, 
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::Roller) = printstyled(io, "roller"; bold=true, color=color(Roller))
-print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect: nqubits=$N")
+print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Prod) = printstyled(io, "prod"; bold=true, color=color(ChainBlock))
