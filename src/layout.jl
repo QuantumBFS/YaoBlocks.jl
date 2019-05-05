@@ -180,9 +180,34 @@ print_block(io::IO, c::Prod) = printstyled(io, "prod"; bold=true, color=color(Ch
 print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
-print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT} = 
-    printstyled(io, "Measure($N; operator=$(c.operator), ",
-        "locs=$(c.locations)...)")
+
+function print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT}
+    strs = String[]
+    if c.operator != ComputationalBasis()
+        push!(strs, "operator=$(repr(c.operator))")
+    end
+
+    if c.locations != AllLocs()
+        push!(strs, "locs=$(repr(c.locations))")
+    end
+    
+    if c.collapseto !== nothing
+        push!(strs, "collapseto=$(c.collapseto)")
+    end
+
+    if c.remove
+        push!(strs, "remove=true")
+    end
+
+    out = join(strs, ", ")
+    if !isempty(strs)
+        out = "Measure($N;" * out
+    else
+        out = "Measure($N" * out
+    end
+
+    return print(io, out, ")")
+end
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
