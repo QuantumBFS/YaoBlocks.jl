@@ -3,25 +3,25 @@ using YaoBase
 export CompositeBlock, AbstractContainer
 
 """
-    CompositeBlock{N, T} <: AbstractBlock{N, T}
+    CompositeBlock{N} <: AbstractBlock{N}
 
 Abstract supertype which composite blocks will inherit from. Composite blocks
 are blocks composited from other [`AbstractBlock`](@ref)s, thus it is a `AbstractBlock`
 as well.
 """
-abstract type CompositeBlock{N, T} <: AbstractBlock{N, T} end
+abstract type CompositeBlock{N} <: AbstractBlock{N} end
 
 YaoBase.isunitary(m::CompositeBlock) = all(isunitary, subblocks(m)) || isunitary(mat(m))
 YaoBase.ishermitian(m::CompositeBlock) = all(ishermitian, subblocks(m)) || ishermitian(mat(m))
 YaoBase.isreflexive(m::CompositeBlock) = all(isreflexive, subblocks(m)) || isreflexive(mat(m))
 
 """
-    AbstractContainer{BT, N, T} <: CompositeBlock{N, T}
+    AbstractContainer{BT, N} <: CompositeBlock{N}
 
 Abstract type for container block. Container blocks are blocks contain a single
 block. Container block should have a
 """
-abstract type AbstractContainer{BT <: AbstractBlock, N, T} <: CompositeBlock{N, T} end
+abstract type AbstractContainer{BT <: AbstractBlock, N} <: CompositeBlock{N} end
 
 """
     content(x)
@@ -84,7 +84,6 @@ end
 include("chain.jl")
 include("kron.jl")
 include("control.jl")
-include("roller.jl")
 include("put_block.jl")
 include("repeated.jl")
 include("concentrator.jl")

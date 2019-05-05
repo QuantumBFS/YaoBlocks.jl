@@ -7,7 +7,7 @@ export PhaseGate, phase
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct PhaseGate{T} <: PrimitiveBlock{1}
     theta::T
 end
 
