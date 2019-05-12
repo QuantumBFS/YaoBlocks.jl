@@ -3,7 +3,7 @@ export AbstractBlock
 using YaoBase, YaoArrayRegister, SimpleTraits
 import YaoBase: @interface
 
-export nqubits, datatype, isreflexive, isunitary, ishermitian
+export nqubits, isreflexive, isunitary, ishermitian
 
 """
     AbstractBlock
@@ -92,6 +92,8 @@ Returns the matrix form of given block.
 """
 @interface mat(x::AbstractBlock) = mat(ComplexF64, x)
 @interface mat(::Type{T}, x::AbstractBlock) where T
+
+Base.Matrix{T}(x::AbstractBlock) where T = Matrix(mat(T, x))
 
 # YaoBase interface
 YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where N = N

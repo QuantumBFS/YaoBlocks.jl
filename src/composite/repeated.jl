@@ -32,7 +32,7 @@ This will create a repeat block which puts 4 X gates on each location.
 
 ```jldoctest
 julia> repeat(4, X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ X gate
 ```
@@ -41,7 +41,7 @@ You can also specify the location
 
 ```jldoctest
 julia> repeat(4, X, (1, 2))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2)
 └─ X gate
 ```
@@ -51,7 +51,7 @@ will change simultaneously.
 
 ```jldoctest
 julia> g = repeat(4, phase(0.1))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.1)
 
@@ -62,7 +62,7 @@ julia> g.content.theta = 0.2
 0.2
 
 julia> g
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 repeat on (1, 2, 3, 4)
 └─ phase(0.2)
 ```
@@ -101,7 +101,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, <:$GT}) where {N, C}
+    @eval function apply!(r::ArrayReg, rp::RepeatedBlock{N, C, $GT}) where {N, C}
         for addr in rp.locs
             instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end

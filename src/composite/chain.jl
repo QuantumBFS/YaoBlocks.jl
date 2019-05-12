@@ -20,7 +20,7 @@ ChainBlock(blocks::AbstractBlock{N}...) where N = ChainBlock(collect(AbstractBlo
     chain(blocks...)
 
 Return a [`ChainBlock`](@ref) which chains a list of blocks with same
-[`nqubits`](@ref) and [`datatype`](@ref). If there is lazy evaluated
+[`nqubits`](@ref). If there is lazy evaluated
 block in `blocks`, chain can infer the number of qubits and create an
 instance itself.
 """
@@ -68,7 +68,7 @@ occupied_locs(c::ChainBlock) =
 chsubblocks(pb::ChainBlock{N}, blocks::Vector{<:AbstractBlock}) where N = length(blocks) == 0 ? ChainBlock{N}([]) : ChainBlock(blocks)
 chsubblocks(pb::ChainBlock, it) = chain(it...)
 
-mat(c::ChainBlock) = prod(x->mat(x), Iterators.reverse(c.blocks))
+mat(::Type{T}, c::ChainBlock) where T = prod(x->mat(T, x), Iterators.reverse(c.blocks))
 
 function apply!(r::AbstractRegister, c::ChainBlock)
     for each in c.blocks

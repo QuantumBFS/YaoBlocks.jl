@@ -18,6 +18,8 @@ mutable struct RotationGate{N, T, GT <: AbstractBlock{N}} <: PrimitiveBlock{N}
 end
 
 RotationGate(block::GT, theta::T) where {N, T <: AbstractFloat, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
+# convert to float if theta is not a floating point
+RotationGate(block::AbstractBlock, theta) = RotationGate(block, Float64(theta))
 
 # bindings
 """

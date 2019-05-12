@@ -55,12 +55,12 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 ```jldoctest
 julia> control(4, (1, 2), 3=>X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 control(1, 2)
 └─ (3,) X gate
 
 julia> control(4, 1, 3=>X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 control(1)
 └─ (3,) X gate
 ```
@@ -130,7 +130,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 
 ```jldoctest
 julia> cnot(3, (2, 3), 1)
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 control(2, 3)
 └─ (1,) X gate
 

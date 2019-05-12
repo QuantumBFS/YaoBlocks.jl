@@ -74,7 +74,7 @@ merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup, blks::AbstractBlock{1}...) =
 merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup, b::PauliGroup, blks::AbstractBlock{1}...) =
     merge_pauli(ex, (out..., merge_pauli(a, b)), blks...)
 
-merge_pauli(ex::Prod{N}, out::Tuple) where N = Prod(out...)
+merge_pauli(ex::Prod{N}, out::Tuple) where N = (println(out); Prod(out...));
 merge_pauli(ex::Prod{N}, out::Tuple{}) where N = IGate{N, T}()
 merge_pauli(ex::Prod{1}, out::Tuple{})= I2
 

@@ -20,7 +20,7 @@ Create a `PauliString` from some Pauli gates.
 
 ```jldoctest
 julia> PauliString(X, Y, Z)
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 PauliString
 ├─ X gate
 ├─ Y gate
@@ -38,7 +38,7 @@ Create a `PauliString` from a list of Pauli gates.
 
 ```jldoctest
 julia> PauliString([X, Y, Z])
-nqubits: 3, datatype: Complex{Float64}
+nqubits: 3
 PauliString
 ├─ X gate
 ├─ Y gate
@@ -46,7 +46,6 @@ PauliString
 ```
 """
 function PauliString(xs::Vector)
-    T = datatype(first(xs))
     for each in xs
         if !(each isa PauliGate)
             error("expect pauli gates")

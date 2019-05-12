@@ -26,7 +26,7 @@ location and block to put on.
 
 ```jldoctest
 julia> put(4, 1=>X)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 put on (1)
 └─ X gate
 ```
@@ -35,7 +35,7 @@ If you want to put a multi-qubit gate on specific locations, you need to write d
 
 ```jldoctest
 julia> put(4, (1, 3)=>kron(X, Y))
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 put on (1, 3)
 └─ kron
    ├─ 1=>X gate

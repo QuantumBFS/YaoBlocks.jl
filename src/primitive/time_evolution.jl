@@ -43,9 +43,9 @@ time_evolve(M::BlockMap, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M->time_evolve(M, dt; kwargs...))
 
-function mat(te::TimeEvolution{N}) where N
-    A = Matrix(mat(te.H.block))
-    return exp(-im*te.dt * A)
+function mat(::Type{T}, te::TimeEvolution{N}) where {T, N}
+    A = Matrix{T}(te.H.block)
+    return exp(-im*T(te.dt) * A)
 end
 
 function apply!(reg::ArrayReg, te::TimeEvolution)

@@ -64,7 +64,7 @@ and a `Y` gate on the `3`rd qubit.
 
 ```jldoctest
 julia> kron(4, 1=>X, 3=>Y)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 kron
 ├─ 1=>X gate
 └─ 3=>Y gate
@@ -86,7 +86,7 @@ You can use kronecker product to composite small blocks to a large blocks.
 
 ```jldoctest
 julia> kron(X, Y, Z, Z)
-nqubits: 4, datatype: Complex{Float64}
+nqubits: 4
 kron
 ├─ 1=>X gate
 ├─ 2=>Y gate
@@ -123,7 +123,7 @@ julia> kron(put(1=>X) for _ in 1:2)
 (n -> kron(n, (n  ->  put(n, 1 => X gate)), (n  ->  put(n, 1 => X gate))))
 
 julia> kron(X for _ in 1:2)
-nqubits: 2, datatype: Complex{Float64}
+nqubits: 2
 kron
 ├─ 1=>X gate
 └─ 2=>X gate
