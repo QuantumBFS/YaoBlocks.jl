@@ -8,9 +8,9 @@ end
     include("composite/composite.jl")
 end
 
-# @testset "test symbolic algebra" begin
-#     include("algebra.jl")
-# end
+@testset "test symbolic algebra" begin
+    include("algebra.jl")
+end
 
 @testset "test layouts" begin
     include("layouts.jl")
