@@ -30,60 +30,93 @@ Base.:(*)(x::Scale, y::Scale) = (x.alpha * y.alpha) * (content(x) * content(y))
 Base.:(*)(x::Scale{Val{S1}}, y::Scale{Val{S2}}) where {S1, S2} = (S1 * S2) * (content(x) * content(y))
 Base.:(*)(x::Scale, y::Scale{Val{S}}) where S = (x.alpha * S) * (content(x) * content(y))
 Base.:(*)(x::Scale{Val{S}}, y::Scale) where S = (S * y.alpha) * (content(x) * content(y))
-Base.:(*)(x::Scale, y::AbstractBlock) = x.alpha * Prod(content(x), y)
-Base.:(*)(y::AbstractBlock, x::Scale) = x.alpha * Prod(y, content(x))
+Base.:(*)(x::Scale, y::AbstractBlock) = x.alpha * chain(y, content(x))
+Base.:(*)(y::AbstractBlock, x::Scale) = x.alpha * chain(content(x), y)
 
 Base.:(+)(xs::AbstractBlock...) = Sum(xs...)
-Base.:(*)(xs::AbstractBlock...) = Prod(xs...)
+Base.:(*)(xs::AbstractBlock...) = chain(Iterators.reverse(xs)...)
 Base.:(/)(A::AbstractBlock, x::Number) = (1/x)*A
 # reduce
 Base.sum(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = Sum(a, blocks...)
-Base.prod(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = Prod(a, blocks...)
+Base.prod(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = chain(Iterators.reverse(blocks)..., a)
 
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Sum(lhs, -rhs)
-Base.:(^)(x::AbstractBlock, n::Int) = Prod((copy(x) for k in 1:n)...)
+Base.:(^)(x::AbstractBlock, n::Int) = chain((copy(x) for k in 1:n)...)
+
+"""
+circuit optimisation
+"""
+module Optimise
+using SimpleTraits
+using YaoBlocks, YaoBlocks.ConstGate
+
+export is_pauli, IsPauliGroup
+
+"""
+    IsPauliGroup{X}
+
+Trait to check if `X` is an element of Pauli group.
+"""
+@traitdef IsPauliGroup{X}
+IsPauliGroup(x) = IsPauliGroup{typeof(x)}()
+
+"""
+    is_pauli(x)
+
+Check if `x` is an element of pauli group.
+
+!!! note
+    this function is just a binding of `SimpleTraits.istrait`, it will not work
+    if the type is not registered as a trait with `@traitimpl`.
+"""
+is_pauli(x::T) where T = SimpleTraits.istrait(IsPauliGroup{T})
+is_pauli(xs...) = all(is_pauli, xs)
 
 for G in [:I2, :X, :Y, :Z]
     ImG = Symbol(:Im, G)
     nImG = Symbol(:nIm, G)
     nG = Symbol(:n, G)
-    GGate = Symbol(G, :Gate)
-    @eval const $ImG = Scale{Val{im}, 1, $GGate}
-    @eval const $nImG = Scale{Val{-im}, 1, $GGate}
-    @eval const $nG = Scale{Val{-1}, 1, $GGate}
+
+    @eval const $ImG = im * $G
+    @eval const $nImG = -im * $G
+    @eval const $nG = -$G
+
+    @eval @traitimpl IsPauliGroup{typeof($G)}
+    @eval @traitimpl IsPauliGroup{typeof($ImG)}
+    @eval @traitimpl IsPauliGroup{typeof($nImG)}
+    @eval @traitimpl IsPauliGroup{typeof($nG)}
 end
 
-
-const PauliGroup = Union{
-    PauliGate, nX, nY, nZ, nI2,
-    ImX, ImY, ImZ, nImX, nImY, nImZ, ImI2, nImI2}
-
+export merge_pauli
 merge_pauli(x) = x
-merge_pauli(ex::Prod{1}) = merge_pauli(ex, ex.list...)
+merge_pauli(x::AbstractBlock, y::AbstractBlock) = x * y
 
-# Well, there should be some way to do this, but just
-# too lazy to implement this pass
-merge_pauli(ex::ChainBlock) = Prod(Iterators.reverse(subblocks(ex))...)
+function merge_pauli(ex::ChainBlock{1})
+    L = length(ex)
+    new_ex = chain(1)
 
-merge_pauli(ex::Prod{1}, blks::AbstractBlock...) = merge_pauli(ex, (), blks...)
-
-merge_pauli(ex::Prod{1}, out::Tuple, a::AbstractBlock{1}, blks::AbstractBlock{1}...) =
-    merge_pauli(ex, (out..., a), blks...)
-merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup, blks::AbstractBlock{1}...) =
-    merge_pauli(ex, (out..., a), blks...)
-merge_pauli(ex::Prod{1}, out::Tuple, a::PauliGroup, b::PauliGroup, blks::AbstractBlock{1}...) =
-    merge_pauli(ex, (out..., merge_pauli(a, b)), blks...)
-
-merge_pauli(ex::Prod{N}, out::Tuple) where N = (println(out); Prod(out...));
-merge_pauli(ex::Prod{N}, out::Tuple{}) where N = IGate{N, T}()
-merge_pauli(ex::Prod{1}, out::Tuple{})= I2
+    # find all contiguous pauli and merge them
+    # note we need to iterate in inverse order
+    iterm = L
+    while iterm > 0
+        if iterm > 1 && is_pauli(ex[iterm], ex[iterm-1])
+            pushfirst!(new_ex, merge_pauli(ex[iterm], ex[iterm-1]))
+            iterm = iterm - 2
+        else
+            # search next
+            pushfirst!(new_ex, ex[iterm])
+            iterm -= 1
+        end
+    end
+    return new_ex
+end
 
 merge_pauli(::XGate, ::YGate) = ImZ
 merge_pauli(::XGate, ::ZGate) = -ImY
 merge_pauli(::YGate, ::XGate) = -ImZ
 merge_pauli(::YGate, ::ZGate) = ImX
 merge_pauli(::ZGate, ::XGate) = ImY
-merge_pauli(::ZGate, ::YGate) = ImX
+merge_pauli(::ZGate, ::YGate) = nImX
 
 for G in [:X, :Y, :Z]
     GT = Symbol(G, :Gate)
@@ -94,14 +127,14 @@ for G in [:X, :Y, :Z]
 end
 
 merge_pauli(::I2Gate, ::I2Gate) = I2
-merge_pauli(x::PauliGroup, y::PauliGroup) = x * y
 
+export eliminate_nested
 eliminate_nested(ex::AbstractBlock) = ex
 
 # TODO: eliminate nested expr e.g chain(X, chain(X, Y))
-function eliminate_nested(ex::Union{Prod, ChainBlock, Sum})
+function eliminate_nested(ex::Union{ChainBlock, Sum})
     _flatten(x) = (x, )
-    _flatten(x::Union{Prod, ChainBlock}) = subblocks(x)
+    _flatten(x::ChainBlock) = subblocks(x)
 
     isone(length(ex)) && return first(subblocks(ex))
     return chsubblocks(ex, Iterators.flatten(map(_flatten, subblocks(ex))))
@@ -114,20 +147,35 @@ merge_alpha(alpha, x::AbstractBlock) = alpha
 merge_alpha(alpha, x::Scale) = alpha * x.alpha
 merge_alpha(alpha, x::Scale{Val{S}}) where S = alpha * S
 
+# since we don't have T in blocks, this is a workaround
+# to get correct identity in type stable term
+merge_alpha(::Nothing, x::Scale) = x.alpha
+merge_alpha(::Nothing, x::Scale{Val{S}}) where S = S
+merge_alpha(::Nothing, x::AbstractBlock) = nothing
+
 merge_scale(ex::AbstractBlock) = ex
 
 # a simple function to find one for Val and Number
 _one(x) = one(x)
+_one(::Type{Val{S}}) where S = one(S)
 _one(::Val{S}) where S = one(S)
 
-function merge_scale(ex::Union{Scale{S, N}, Prod{N}, ChainBlock{N}}) where {S, N}
-    alpha = _one(S)
+export merge_scale
+
+function merge_scale(ex::Union{Scale{S, N}, ChainBlock{N}}) where {S, N}
+    alpha = nothing
     for each in subblocks(ex)
         alpha = merge_alpha(alpha, each)
     end
     ex = chsubblocks(ex, map(_unscale, subblocks(ex)))
-    return alpha * ex
+    if alpha === nothing
+        return ex
+    else
+        return alpha * ex
+    end
 end
+
+export combine_similar
 
 combine_similar(ex::AbstractBlock) = ex
 
@@ -142,7 +190,7 @@ function combine_similar(ex::Sum{N}) where N
             # check similar term
             term = ex[p]
             table[p] = true # mark it in the table
-            alpha = 1.0
+            alpha = 1
             for (k, each) in enumerate(ex)
                 if table[k] == true # checked term, skip
                     continue
@@ -150,7 +198,7 @@ function combine_similar(ex::Sum{N}) where N
                     # check if unscaled term is the same
                     # merge them if they are
                     if _unscale(term) == _unscale(each)
-                        alpha += merge_alpha(alpha, seach)
+                        alpha += merge_alpha(alpha, each)
                         # mark checked term in the table
                         table[k] = true
                     end
@@ -211,4 +259,7 @@ function simplify_pass(rules, ex)
         ex = rule(ex)
     end
     return ex
+end
+
+
 end
