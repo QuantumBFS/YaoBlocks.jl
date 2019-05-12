@@ -51,4 +51,3 @@ end
     g = chain(2, kron(1=>chain(X, Y), 2=>X), control(1, 2=>X))
     @test simplify(g) == prod(control(2, 1, 2=>X), kron(2, 1=>(-im * Z), 2=>X))
 end
-
