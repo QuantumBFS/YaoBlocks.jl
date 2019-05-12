@@ -76,8 +76,8 @@ for METHOD in (:ishermitian, :isreflexive, :isunitary)
     end
 end
 
-function Base.:(==)(lhs::AbstractContainer{BT, N, T},
-        rhs::AbstractContainer{BT, N, T}) where {BT, N, T}
+function Base.:(==)(lhs::AbstractContainer{BT, N},
+        rhs::AbstractContainer{BT, N}) where {BT, N}
     return content(lhs) == content(rhs)
 end
 
@@ -92,7 +92,6 @@ include("pauli_strings.jl")
 
 chsubblocks(x::ChainBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
 chsubblocks(x::KronBlock, it::AbstractBlock) = chsubblocks(x, (it, ))
-chsubblocks(x::Roller, it::AbstractBlock) = chsubblocks(x, (it, ))
 chsubblocks(x::Prod, it::AbstractBlock) = chsubblocks(x, (it, ))
 chsubblocks(x::Sum, it::AbstractBlock) = chsubblocks(x, (it, ))
 

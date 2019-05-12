@@ -168,7 +168,7 @@ function define_methods(__module__::Module, const_binding, name)
         @eval $__module__ begin
             YaoBlocks.mat(::Type{eltype($const_binding)}, ::Type{$gt_name}) = $const_binding
             # forward instance to const gate type
-            YaoBlocks.mat(::Type{T}, ::GT) where {T, GT} <: $gt_name = YaoBlocks.mat(T, GT)
+            YaoBlocks.mat(::Type{T}, ::GT) where {T, GT <: $gt_name} = YaoBlocks.mat(T, GT)
 
             function YaoBlocks.mat(::Type{T}, ::Type{$gt_name}) where T
                 src = YaoBlocks.mat(eltype($const_binding), $gt_name)

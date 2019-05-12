@@ -91,7 +91,7 @@ Base.copy(x::AbstractBlock) = x
 Returns the matrix form of given block.
 """
 @interface mat(x::AbstractBlock) = mat(ComplexF64, x)
-@interface mat(::Type{T}, x::AbstractBlock)
+@interface mat(::Type{T}, x::AbstractBlock) where T
 
 # YaoBase interface
 YaoBase.nqubits(::Type{<:AbstractBlock{N}}) where N = N

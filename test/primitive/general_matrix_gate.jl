@@ -1,6 +1,6 @@
 using Test, Random, LinearAlgebra, YaoArrayRegister, YaoBlocks
 
-mg = matblock(rand(4, 4))
+mg = matblock(rand(ComplexF64, 4, 4))
 mg2 = copy(mg)
 @test mg2 == mg
 

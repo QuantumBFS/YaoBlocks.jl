@@ -139,7 +139,7 @@ function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
         b2 = mathop(m, b)
         nstate[b2+1, :] = view(r.state, b+1, :)
     end
-    r.state = nstate
+    r.state .= nstate
     return r
 end
 

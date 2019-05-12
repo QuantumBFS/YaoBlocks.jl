@@ -48,7 +48,7 @@ function mat(::Type{T}, A::GeneralMatrixBlock) where T
     else
         # this errors before, but since we allow one to specify T in mat
         # this should be allowed but with a suggestion
-        @warn "converting to eltype $T, consider create another matblock with eltype $T"
+        @warn "converting $(eltype(A.mat)) to eltype $T, consider create another matblock with eltype $T"
         return copyto!(similar(A.mat, T), A.mat)
     end
 end

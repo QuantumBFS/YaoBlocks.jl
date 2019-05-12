@@ -84,7 +84,7 @@ end
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, <:$GT, T}) where {N, C, T}
+    @eval function apply!(r::ArrayReg, pb::PutBlock{N, C, <:$GT}) where {N, C}
         _check_size(r, pb)
         instruct!(matvec(r.state), Val($(QuoteNode(G))), pb.locs)
         return r

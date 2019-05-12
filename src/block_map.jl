@@ -7,7 +7,7 @@ export BlockMap
 struct BlockMap{T, GT <: AbstractBlock} <: LinearMap{T}
     block::GT
 
-    BlockMap(::Type{T}, block::GT) where GT <: AbstractBlock = new{T, GT}(block)
+    BlockMap(::Type{T}, block::GT) where {T, GT <: AbstractBlock} = new{T, GT}(block)
 end
 
 BlockMap(block::AbstractBlock) = BlockMap(ComplexF64, block)

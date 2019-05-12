@@ -157,13 +157,3 @@ function cache(server::AbstractCacheServer, block::KronBlock, level::Int; recurs
 
     return CachedBlock(server, x, level)
 end
-
-function cache(server::AbstractCacheServer, block::Roller, level::Int; recursive::Bool=false)
-    if recursive
-        roller = Roller{T}(ntuple(x->cache(server, block[x], level, recursive=recursive), Val(M))...)
-    else
-        roller = block
-    end
-
-    return CachedBlock(server, roller, level)
-end
