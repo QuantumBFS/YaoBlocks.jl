@@ -179,6 +179,11 @@ export combine_similar
 
 combine_similar(ex::AbstractBlock) = ex
 
+combine_alpha(alpha, x) = alpha
+combine_alpha(alpha, x::AbstractBlock) = alpha + 1
+combine_alpha(alpha, x::Scale) = alpha + x.alpha
+combine_alpha(alpha, x::Scale{Val{S}}) where S = alpha + S
+
 function combine_similar(ex::Sum{N}) where N
     table = zeros(Bool, length(ex))
     list = []; p = 1
@@ -198,7 +203,7 @@ function combine_similar(ex::Sum{N}) where N
                     # check if unscaled term is the same
                     # merge them if they are
                     if _unscale(term) == _unscale(each)
-                        alpha += merge_alpha(alpha, each)
+                        alpha = combine_alpha(alpha, each)
                         # mark checked term in the table
                         table[k] = true
                     end
