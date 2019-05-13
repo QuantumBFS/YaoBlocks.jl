@@ -87,3 +87,10 @@ end
     end
 
 end
+
+@testset "I gate" begin
+    g = ConstGate.IGate{2}()
+    @test mat(g) == IMatrix{4, ComplexF64}()
+    @test ishermitian(g)
+    @test isunitary(g)
+end
