@@ -39,3 +39,12 @@ end
 
     @test_throws AssertionError dispatch!(Rx(0.1), (0.2, 0.3))
 end
+
+@testset "adjoints" begin
+    @test Rx(0.1)' == Rx(-0.1)
+    @test Rx(0.2)' == Rx(-0.2)
+    @test copy(Rx(0.1)) == Rx(0.1)
+    
+    g = Rx(0.1) # creates a new one
+    @test copy(g) !== g
+end
