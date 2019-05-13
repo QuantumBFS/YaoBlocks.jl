@@ -15,4 +15,4 @@ mg2.mat[:, 2] .= 10
 reg = rand_state(2)
 @test apply!(copy(reg), mg) |> statevec == mat(mg) * reg.state |> vec
 
-@test matblock(X) = GeneralMatrixBlock(mat(X))
+@test matblock(X) == GeneralMatrixBlock(mat(X))

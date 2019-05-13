@@ -29,7 +29,7 @@ const PauliGate = Union{I2Gate, XGate, YGate, ZGate}
 YaoBlocks.cache_key(x::ConstantGate) = 0x1
 
 struct IGate{N} <: ConstantGate{N} end
-YaoBlocks.mat(::Type{T}, ::IGate{N}) where {T, N} = IMatrix{N, T}()
+YaoBlocks.mat(::Type{T}, ::IGate{N}) where {T, N} = IMatrix{1<<N, T}()
 
 YaoBase.ishermitian(::IGate) = true
 YaoBase.isunitary(::IGate) = true
