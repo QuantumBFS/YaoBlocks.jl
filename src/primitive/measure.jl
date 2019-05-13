@@ -2,11 +2,12 @@ using YaoBase, YaoArrayRegister
 export Measure, AllLocs, ComputationalBasis
 
 """
-    Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
+    Measure{N, K, OT} <: PrimitiveBlock{N}
+    Measure(n::Int; operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
 
 Measure operator.
 """
-mutable struct Measure{N, K, OT} <: PrimitiveBlock{N, Bool}
+mutable struct Measure{N, K, OT} <: PrimitiveBlock{N}
     operator::OT
     locations::Union{NTuple{K, Int}, AllLocs}
     collapseto::Union{Int, Nothing}
@@ -34,14 +35,14 @@ You can create a `Measure` block on given basis (default is the computational ba
 
 ```jldoctest
 julia> Measure(4)
-Measure(4; operator=YaoBase.ComputationalBasis(), locs=YaoBase.AllLocs()...)
+Measure(4)
 ```
 
 Or you could specify which qubits you are going to measure
 
 ```jldoctest
-julia> Measure(4; locs=1:2)
-Measure(4; operator=ComputationalBasis(), locs=(1, 2)...)
+julia> Measure(4; locs=1:3)
+Measure(4; locs=(1, 2, 3))
 ```
 
 by default this will collapse the current register to measure results.
@@ -63,7 +64,7 @@ julia> state(r)
  0.048647936794205926 + 0.31047610497928607im
 
 julia> r |> Measure(3)
-Measure(3; operator=ComputationalBasis(), locs=AllLocs()...)
+Measure(3)
 
 julia> state(r)
 8×1 Array{Complex{Float64},2}:
@@ -80,8 +81,8 @@ julia> state(r)
 But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
 
 ```jldoctest
-julia> m = Measure(4; collapseto=bit"101")
-Measure(4; operator=ComputationalBasis(), locs=AllLocs()...)
+julia> Measure(4; collapseto=0b101)
+Measure(4;collapseto=5)
 
 julia> m.collapseto
 5

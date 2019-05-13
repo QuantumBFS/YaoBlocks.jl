@@ -7,19 +7,32 @@ export PhaseGate, phase
 
 Global phase gate.
 """
-mutable struct PhaseGate{T} <: PrimitiveBlock{1, Complex{T}}
+mutable struct PhaseGate{T <: Real} <: PrimitiveBlock{1}
     theta::T
 end
 
 """
     phase(theta)
 
-Returns a global phase gate.
+Returns a global phase gate. Defined with following matrix form:
+
+```math
+exp(iθ) \\mathbf{I}
+```
+
+# Example
+
+You can create a global phase gate with a phase (a real number).
+
+```jldoctest
+julia> phase(0.1)
+phase(0.1)
+```
 """
 phase(θ::AbstractFloat) = PhaseGate(θ)
 phase(θ::Real) = phase(Float64(θ))
 
-mat(gate::PhaseGate{T}) where T = exp(im * gate.theta) * IMatrix{2, Complex{T}}()
+mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T}()
 
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1
