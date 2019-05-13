@@ -54,7 +54,7 @@ function mat(::Type{T}, g::Swap{N}) where {T, N}
     return PermMatrix(orders, ones(T, 1<<N))
 end
 
-apply!(r::ArrayReg, g::Swap) = instruct!(state(r), Val(:SWAP), g.locs)
+apply!(r::ArrayReg, g::Swap) = (instruct!(state(r), Val(:SWAP), g.locs); r)
 occupied_locs(g::Swap) = g.locs
 
 Base.:(==)(lhs::Swap, rhs::Swap) = lhs.locs == rhs.locs
