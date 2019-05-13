@@ -9,6 +9,13 @@ struct Daggered{BT <: AbstractBlock, N} <: TagBlock{BT, N}
     content::BT
 end
 
+"""
+    Daggered(x)
+
+Create a [`Daggered`](@ref) block with given block `x`.
+
+# Example
+"""
 Daggered(x::BT) where {N, BT<:AbstractBlock{N}} =
     Daggered{BT, N}(x)
 

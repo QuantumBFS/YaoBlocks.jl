@@ -26,7 +26,7 @@ end
 
 @testset "test apply" begin
     r = rand_state(1)
-    @test state(apply!(copy(r), Rx(0.1))) ≈ mat(Rx) * state(r)
+    @test state(apply!(copy(r), Rx(0.1))) ≈ mat(Rx(0.1)) * state(r)
 end
 
 @testset "test dispatch" begin
