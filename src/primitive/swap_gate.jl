@@ -3,6 +3,11 @@ using YaoArrayRegister: swaprows!
 
 export Swap, swap
 
+"""
+    Swap{N, T} <: PrimitiveBlock{N, T}
+
+Swap block, which will swap two locations given.
+"""
 struct Swap{N} <: PrimitiveBlock{N}
     locs::Tuple{Int, Int}
 
@@ -17,15 +22,29 @@ Swap{N}(loc1::Int, loc2::Int) where N = Swap{N}((loc1, loc2))
 """
     swap(n, loc1, loc2)
 
-Return a `n`-qubit [`Swap`](@ref) gate which swap `loc1` and `loc2`.
+Create a `n`-qubit [`Swap`](@ref) gate which swap `loc1` and `loc2`.
+
+# Example
+
+```jldoctest
+julia> swap(4, 1, 2)
+swap(1, 2)
+```
 """
 swap(n::Int, loc1::Int, loc2::Int) = Swap{n}((loc1, loc2))
 
 """
     swap(loc1, loc2) -> f(n)
 
-Return a lambda that takes the total number of active qubits as input. See also
-[`swap`](@ref), [`Swap`](@ref).
+Create a lambda that takes the total number of active qubits as input. Lazy curried
+version of `swap(n, loc1, loc2)`. See also [`Swap`](@ref).
+
+# Example
+
+```jldoctest
+julia> swap(1, 2)
+(n -> swap(n, 1, 2))
+```
 """
 swap(loc1::Int, loc2::Int) = @λ(n -> swap(n, loc1, loc2))
 
