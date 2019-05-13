@@ -94,3 +94,8 @@ end
     @test ishermitian(g)
     @test isunitary(g)
 end
+
+@testset "test adjoints" begin
+    adjoint(Pu) == Pd
+    adjoint(Pd) == Pu
+end
