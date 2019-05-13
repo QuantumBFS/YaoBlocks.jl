@@ -15,6 +15,10 @@ end
 Create a [`Daggered`](@ref) block with given block `x`.
 
 # Example
+
+```jldoctest
+
+```
 """
 Daggered(x::BT) where {N, BT<:AbstractBlock{N}} =
     Daggered{BT, N}(x)
