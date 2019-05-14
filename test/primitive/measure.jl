@@ -1,5 +1,7 @@
-using Test, YaoBase, YaoBlocks, BitBasis, YaoArrayRegister
+using Test, YaoBase, YaoBlocks, BitBasis, YaoArrayRegister, Random
 using StatsBase: mean
+
+Random.seed!(1234)
 
 @testset "measure ghz" begin
     # GHZ state
