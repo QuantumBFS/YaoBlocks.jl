@@ -1,11 +1,10 @@
 using Test, YaoBase, YaoBlocks, BitBasis, YaoArrayRegister, Random
 using StatsBase: mean
 
-Random.seed!(1234)
-
 @testset "measure ghz" begin
     # GHZ state
     st = normalize!(ArrayReg(bit"0000") + ArrayReg(bit"1111"))
+    Random.seed!(1234)
 
     # measure it at 1, 2
     # should collapse to 0000 or 1111 since entangled
@@ -16,6 +15,8 @@ Random.seed!(1234)
 end
 
 @testset "collapseto" begin
+    Random.seed!(1234)
+
     st = rand_state(5; nbatch=3)
     g = Measure(5; locs=(1, 2), collapseto=bit"11")
     st |> g
@@ -33,6 +34,8 @@ end
 
 
 @testset "op-measures" begin
+    Random.seed!(1234)
+
     reg = rand_state(6, nbatch=10)
     op = repeat(3, X)
 
