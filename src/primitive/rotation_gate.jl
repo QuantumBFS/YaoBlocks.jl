@@ -97,7 +97,8 @@ function apply!(r::ArrayReg, rb::RotationGate)
     apply!(r, rb.block)
     # NOTE: we should not change register's memory address,
     # or batch operations may fail
-    r.state .= -im*sin(rb.theta/2)*r.state + cos(rb.theta/2)*v0
+    t = -im*sin(rb.theta/2)*r.state + cos(rb.theta/2)*v0
+    copyto!(r.state, t)
     return r
 end
 
