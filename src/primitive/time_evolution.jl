@@ -10,15 +10,16 @@ TimeEvolution, where GT is block type. input matrix should be hermitian.
 !!!note:
     `TimeEvolution` contructor check hermicity of the input block by default, but sometimes it can be slow. Turn off the check manually by specifying optional parameter `check_hermicity = false`.
 """
-mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractMatrix} <: PrimitiveBlock{N}
-    H::Hamilton
+mutable struct TimeEvolution{N, T, Tt, Hamilton <: AbstractBlock{N}} <: PrimitiveBlock{N}
+    H::BlockMap{Complex{T}, Hamilton}
     dt::Tt
     tol::T
 
     function TimeEvolution(
-        H::TH,
-        dt::Tt, tol::T) where {Tt, T, TH <: AbstractMatrix}
-        return new{log2dim1(H), T, Tt, TH}(H, dt, tol)
+        H::BlockMap{Complex{T}, TH},
+        dt::Tt, tol::T; check_hermicity::Bool=true) where {N, Tt, T, TH <: AbstractBlock{N}}
+        (check_hermicity && !ishermitian(H)) && error("Time evolution Hamiltonian has to be a Hermitian")
+        return new{N, T, Tt, TH}(H, dt, tol)
     end
 end
 
@@ -32,14 +33,20 @@ Optional keywords are tolerance `tol` (default is `1e-7`)
 `TimeEvolution` block can also be used for
 [imaginary time evolution](http://large.stanford.edu/courses/2008/ph372/behroozi2/) if dt is complex.
 """
-TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7) = TimeEvolution(mat(H), dt, tol)
-TimeEvolution(M::AbstractMatrix, dt; tol::Real) = TimeEvolution(M, dt, tol)
+TimeEvolution(H::AbstractBlock, dt; tol::Real=1e-7, check_hermicity=true) =
+    TimeEvolution(BlockMap(H), dt, tol, check_hermicity=check_hermicity)
 
-time_evolve(M::AbstractMatrix, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
+TimeEvolution(M::BlockMap, dt; tol::Real, check_hermicity=true) =
+    TimeEvolution(M, dt, tol, check_hermicity=check_hermicity)
+
+time_evolve(M::BlockMap, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(M::AbstractBlock, dt; kwargs...) = TimeEvolution(M, dt; kwargs...)
 time_evolve(dt; kwargs...) = @λ(M->time_evolve(M, dt; kwargs...))
 
-mat(::Type{T}, te::TimeEvolution{N}) where {T, N} = exp(-im*T(te.dt) * Matrix{T}(te.H))
+function mat(::Type{T}, te::TimeEvolution{N}) where {T, N}
+    A = Matrix{T}(te.H.block)
+    return exp(-im*T(te.dt) * A)
+end
 
 function apply!(reg::ArrayReg, te::TimeEvolution)
     st = state(reg)
