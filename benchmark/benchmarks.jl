@@ -27,6 +27,8 @@ for n in 5:5:25
     SUITE["composite"]["kron(sparse_const)"] = bench(kron(n, k=>rand([X, Y, Z, H]) for k in randperm(n)[1:n÷5]))
 end
 
+# TODO: random control
+
 function heisenberg(n::Int; periodic::Bool=true)
     Sx(i) = put(n, i=>X)
     Sy(i) = put(n, i=>Y)
