@@ -1,6 +1,6 @@
 export @const_gate, ConstantGate, ConstGate,
-    X, Y, Z, H, I2,
-    XGate, YGate, ZGate, HGate, I2Gate
+    X, Y, Z, H, I2, SWAP,
+    XGate, YGate, ZGate, HGate, I2Gate, SWAPGate
 
 """
     ConstGate
