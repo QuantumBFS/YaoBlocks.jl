@@ -58,7 +58,7 @@ end
         kron(4, 1=>X, 2=>Y),
         kron(4, 1=>phase(0.1)))
 
-    @test occupied_locs(g) |> collect == [1, 2]
+    @test occupied_locs(g) == (1, 2)
 
     g = ChainBlock(
         kron(2, X, Y),

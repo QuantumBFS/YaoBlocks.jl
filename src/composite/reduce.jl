@@ -51,7 +51,7 @@ Base.insert!(c::Sum{N}, index::Integer, val::AbstractBlock{N}) where N = (insert
 Base.adjoint(blk::Sum{N}) where N = Sum{N}(map(adjoint, subblocks(blk)))
 
 ## Iterate contained blocks
-occupied_locs(c::Sum) = Tuple(unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c))))
+occupied_locs(c::Sum) = (unique(Iterators.flatten(occupied_locs(b) for b in subblocks(c)))...,)
 
 # Additional Methods for Sum
 Base.push!(c::Sum{N}, val::AbstractBlock{N}) where N = (push!(c.list, val); c)

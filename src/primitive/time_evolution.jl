@@ -1,5 +1,4 @@
 using ExponentialUtilities, YaoArrayRegister
-using LinearMaps
 
 export TimeEvolution, time_evolve
 
