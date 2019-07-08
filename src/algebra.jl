@@ -37,7 +37,7 @@ Base.:(+)(xs::AbstractBlock...) = Sum(xs...)
 Base.:(*)(xs::AbstractBlock...) = chain(Iterators.reverse(xs)...)
 Base.:(/)(A::AbstractBlock, x::Number) = (1/x)*A
 # reduce
-Base.sum(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = Sum(a, blocks...)
+Base.sum(blocks::AbstractArray{T}) where {N, T<:AbstractBlock{N}} = Sum(blocks...)
 Base.prod(a::AbstractBlock{N}, blocks::AbstractBlock{N}...) where N = chain(Iterators.reverse(blocks)..., a)
 
 Base.:(-)(lhs::AbstractBlock, rhs::AbstractBlock) = Sum(lhs, -rhs)

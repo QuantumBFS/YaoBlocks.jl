@@ -1,9 +1,11 @@
 using Test, YaoBlocks, YaoArrayRegister, YaoBlocks.Optimise
-import YaoBlocks: Sum
+import YaoBlocks.ConstGate: Toffoli
+using YaoBase: QubitMismatchError
 
 @testset "construction" begin
-    @test X + Y + Z == sum(X, Y, Z)
-    @test X + (Y + Z) == sum(X, sum(Y, Z))
+    @test X + Y + Z == +(X, Y, Z)
+    @test sum([X, Y, Z]) == +(X, Y, Z)
+    @test X + (Y + Z) == Sum(X, Sum(Y, Z))
 
     @test X * Y * Z == prod(X, Y, Z)
     @test X * (Y * Z) == prod(X, prod(Y, Z))
@@ -11,6 +13,47 @@ import YaoBlocks: Sum
 
     @test mat(X-Y) ≈ mat(X) - mat(Y)
     @test mat(X/2) ≈ 0.5*mat(X)
+end
+
+
+@testset "Sum" begin
+    ad = Sum(put(3, 2=>X), 3*put(3, 1=>rot(Y, 0.3)), repeat(3, Z, (2,3)))
+    @test [push!(copy(ad), put(3, 1=>X))...] |> length == 4
+    @test insert!(copy(ad), 2, put(3, 1=>X)) isa Sum
+    @test append!(copy(ad), [put(3, 1=>X)]) |> length == 4
+    @test prepend!(copy(ad), [put(3, 1=>X)]) |> length == 4
+
+    @test [occupied_locs(ad)...] |> sort! == [1,2,3]
+    @test occupied_locs(+(put(5, 2=>X), put(5, 3=>I2))) == (2,)
+    ad2 = copy(ad)
+    @test ad2 == ad
+    push!(ad2, Toffoli)
+    @test ad2 != ad
+    @test ad2[1:end-1] == ad
+    @test ad2[end] == Toffoli
+    @test length(ad2) == 4
+    println(ad2)
+    @test cache_key(ad) != cache_key(ad2)
+    @test hash(ad) != hash(ad2)
+    ad3 = chsubblocks(ad, [put(3, 1=>X)])
+    append!(prepend!(ad3, [rot(Toffoli, 0.2)]), [control(3, 1, 2=>X)])
+    @test ad3 == Sum(rot(Toffoli, 0.2), put(3, 1=>X), control(3, 1, 2=>X))
+    ad3[3] = ad3[1]
+    @test ad3 == Sum(rot(Toffoli, 0.2), put(3, 1=>X), rot(Toffoli, 0.2))
+    @test ad3' == Sum(rot(Toffoli, -0.2), put(3, 1=>X), rot(Toffoli, -0.2))
+
+    ad4 = similar(ad3)
+    @test typeof(ad4) == typeof(ad3)
+    @test length(ad4) == 0
+
+    reg = rand_state(3)
+    @test apply!(copy(reg), ad) ≈ apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) + apply!(copy(reg), ad[3])
+    @test mat(ad)*reg.state ≈ apply!(copy(reg), ad[1]) + apply!(copy(reg), ad[2]) + apply!(copy(reg), ad[3]) |> state
+
+    @test Sum{3}() isa Sum
+    @test Sum{3}([put(3,3=>X)]) isa Sum
+    @test_throws MethodError Sum{3}([put(10,2=>X)])
+    @test_throws MethodError Sum(put(10,2=>X), put(4, 3=>X))
 end
 
 @testset "block operations" begin
@@ -21,7 +64,7 @@ end
 
 @testset "merge pauli prod" begin
     test_merge(a, b) = mat(merge_pauli(a, b)) ≈ (mat(a) * mat(b))
-    
+
     for a in [X, Y, Z], b in [X, Y, Z]
         @test test_merge(a, b)
     end
@@ -37,14 +80,14 @@ end
 @testset "eliminate nested" begin
     @test simplify(prod(X, prod(H))) == prod(X, H)
     @test simplify(prod(X)) == X
-    
-    @test simplify(sum(X, sum(X, X))) == 3X
+
+    @test simplify(Sum(X, Sum(X, X))) == 3X
 end
 
 @testset "reduce matrices" begin
     @test mat(prod(X, Y)) ≈ mat(X) * mat(Y)
     @test mat(prod(X, Y)) ≈ mat(simplify(prod(X, Y)))
-    @test mat(sum(X, Y)) ≈ mat(X) + mat(Y)
+    @test mat(Sum(X, Y)) ≈ mat(X) + mat(Y)
 end
 
 @testset "composite strcuture" begin
