@@ -157,7 +157,7 @@ color(::Type{<:Swap}) = :magenta
 color(::Type{<:ControlBlock}) = :red
 color(::Type{<:ChainBlock}) = :blue
 color(::Type{<:MathGate}) = :red
-color(::Type{<:Sum}) = :red
+color(::Type{<:Add}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
@@ -175,7 +175,7 @@ print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=c
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
-print_block(io::IO, c::Sum) = printstyled(io, "+"; bold=true, color=color(Sum))
+print_block(io::IO, c::Add) = printstyled(io, "+"; bold=true, color=color(Add))
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
 

@@ -36,8 +36,8 @@ end
 @testset "test single block chsubblocks" begin
     @test chsubblocks(chain(X), Y) == chain(Y)
     @test chsubblocks(kron(X), Y) == kron(Y)
-    @test chsubblocks(prod(X), Y) == prod(Y)
-    @test chsubblocks(Sum(X), Y) == Sum(Y)
+    @test chsubblocks(*(X), Y) == *(Y)
+    @test chsubblocks(+(X), Y) == +(Y)
 end
 
 # check extension fallback errors
