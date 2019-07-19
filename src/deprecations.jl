@@ -3,3 +3,4 @@
 @deprecate setiparameters!(args...) setiparams!(args...)
 @deprecate niparameters(args...) niparams(args...)
 @deprecate parameter_type(args...) parameters_eltype(args...)
+const Sum = Add
