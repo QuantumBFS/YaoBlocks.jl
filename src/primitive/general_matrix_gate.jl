@@ -43,6 +43,8 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
 matblock(m::AbstractBlock) = GeneralMatrixBlock(mat(m))
 
+mat(A::GeneralMatrixBlock) = A.mat
+
 function mat(::Type{T}, A::GeneralMatrixBlock) where T
     if eltype(A.mat) == T
         return A.mat
