@@ -49,6 +49,12 @@ chsubblocks(x::AbstractContainer, it::AbstractBlock) = throw(NotImplementedError
 #   - use simple traits instead
 #   - each property should have a trait
 # NOTE: this is a holy trait, no overhead, don't use methods on this
+"""
+    PropertyTrait
+    PropertyTrait(::AbstractContainer) -> PropertyTrait
+
+Typically, it can be `PreserveAll()` for those containers that do not change `ishermitian`, `isunitary` and `isreflexive` properties, otherwise fallback to `PreserveNothing`.
+"""
 abstract type PropertyTrait end
 struct PreserveAll <: PropertyTrait end
 struct PreserveNothing <: PropertyTrait end
