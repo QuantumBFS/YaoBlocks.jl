@@ -14,7 +14,7 @@ function YaoBase.instruct!(::EchoReg{B}, ::Val{G}, locs, args...) where {B, G}
     return true
 end
 
-function YaoBase.focus!(::EchoReg{B}, locs) where {B}
+function YaoBase.focus!(reg::EchoReg{B}, locs) where {B}
     println("focus -> $locs")
     reg.nactive = length(locs)
     return true
@@ -26,7 +26,7 @@ function YaoBase.relax!(reg::EchoReg{B}, locs; to_nactive=nqubits(reg)) where {B
     return true
 end
 
-function YaoBase.measure!(::ComputationalBasis, reg::EchoReg{B}, locs) where {B}
+function YaoBase.measure!(rng, ::ComputationalBasis, reg::EchoReg{B}, locs) where {B}
     println("measure -> $locs")
     return true
 end
