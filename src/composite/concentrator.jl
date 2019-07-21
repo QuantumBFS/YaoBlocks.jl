@@ -84,7 +84,7 @@ concentrate(block::Function, locs) = @λ(n->concentrate(n, block, locs))
 occupied_locs(c::Concentrator) = c.locations
 chsubblocks(pb::Concentrator{N}, blk::AbstractBlock) where N =
     Concentrator{N}(blk, occupied_locs(pb))
-PreserveStyle(::Concentrator) = PreserveAll()
+PropertyTrait(::Concentrator) = PreserveAll()
 
 function apply!(r::AbstractRegister, c::Concentrator)
     _check_size(r, c)

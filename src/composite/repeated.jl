@@ -84,7 +84,7 @@ Base.repeat(x::AbstractBlock, locs) = @λ(n->repeat(n, x, locs...,))
 
 occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.locs)
 chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.locs)
-PreserveProperty(x::RepeatedBlock) = PreserveAll()
+PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{N}) where {T, N} = hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
 mat(::Type{T}, rb::RepeatedBlock{N, 0, GT}) where {T, N, GT} = IMatrix{1<<N, T}()

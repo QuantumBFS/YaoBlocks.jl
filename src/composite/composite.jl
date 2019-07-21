@@ -49,26 +49,20 @@ chsubblocks(x::AbstractContainer, it::AbstractBlock) = throw(NotImplementedError
 #   - use simple traits instead
 #   - each property should have a trait
 # NOTE: this is a holy trait, no overhead, don't use methods on this
-abstract type PreserveStyle end
-struct PreserveAll <: PreserveStyle end
-struct PreserveProperty{F} <: PreserveStyle end
-struct PreserveNothing <: PreserveStyle end
+abstract type PropertyTrait end
+struct PreserveAll <: PropertyTrait end
+struct PreserveNothing <: PropertyTrait end
 
-PreserveStyle(c::AbstractContainer) = PreserveNothing()
+PropertyTrait(c::AbstractContainer) = PreserveNothing()
 
 for METHOD in (:ishermitian, :isreflexive, :isunitary)
     @eval begin
         # forward to trait
-        YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PreserveStyle(x), x)
+        YaoBase.$METHOD(x::AbstractContainer) = $METHOD(PropertyTrait(x), x)
         # forward parent block property
         YaoBase.$METHOD(::PreserveAll, c::AbstractContainer) = $METHOD(content(c))
         # forward to default property by calculating the matrix
         YaoBase.$METHOD(::PreserveNothing, c::AbstractContainer) = $METHOD(mat(c))
-        # preseve each property
-        YaoBase.$METHOD(::PreserveProperty{$(QuoteNode(METHOD))}, c::AbstractContainer) =
-            $METHOD(content(c))
-        # fallback
-        YaoBase.$METHOD(::PreserveStyle, c::AbstractContainer) = $METHOD(content(c))
     end
 end
 
