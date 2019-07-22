@@ -52,7 +52,7 @@ end
 """
     occupied_locs(x)
 
-Return an iterator of occupied locations of `x`.
+Return a tuple of occupied locations of `x`.
 """
 @interface occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
 
