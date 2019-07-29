@@ -17,6 +17,7 @@ abstract type AbstractBlock{N} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
+
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
@@ -25,7 +26,7 @@ _apply_fallback!(r::AbstractRegister, b::AbstractBlock) = throw(NotImplementedEr
 
 function _apply_fallback!(r::ArrayReg, b::AbstractBlock)
     _check_size(r, b)
-    r.state .= mat(b) * r.state
+    r.state .= mat(T, b) * r.state
     return r
 end
 
