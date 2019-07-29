@@ -37,7 +37,7 @@ matblock(...)
 !!!warn
     
     Instead of converting it to the default data type `ComplexF64`,
-    this will return its contained matrix.
+    this will return its contained matrix when calling `mat`.
 """
 matblock(m::AbstractMatrix) = GeneralMatrixBlock(m)
 
