@@ -33,6 +33,11 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 julia> matblock(ComplexF64[0 1;1 0])
 matblock(...)
 ```
+
+!!!warn
+    
+    Instead of converting it to the default data type `ComplexF64`,
+    this will return its contained matrix.
 """
 matblock(m::AbstractMatrix) = GeneralMatrixBlock(m)
 
@@ -43,7 +48,17 @@ Create a [`GeneralMatrixBlock`](@ref) with a matrix `m`.
 """
 matblock(m::AbstractBlock) = GeneralMatrixBlock(mat(m))
 
-"""Note: `mat(blk::GeneralMatrixBlock)` returns `blk.mat`, instead of converting it to the default data type `ComplexF64`."""
+"""
+    mat(A::GeneralMatrixBlock)
+
+Return the matrix of general matrix block.
+
+
+!!!warn
+    
+    Instead of converting it to the default data type `ComplexF64`,
+    this will return its contained matrix.
+"""
 mat(A::GeneralMatrixBlock) = A.mat
 
 function mat(::Type{T}, A::GeneralMatrixBlock) where T
