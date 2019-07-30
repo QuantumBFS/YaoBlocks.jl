@@ -24,7 +24,7 @@ end
 
 _apply_fallback!(r::AbstractRegister, b::AbstractBlock) = throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
-function _apply_fallback!(r::ArrayReg, b::AbstractBlock)
+function _apply_fallback!(r::ArrayReg{T}, b::AbstractBlock) where T
     _check_size(r, b)
     r.state .= mat(T, b) * r.state
     return r
