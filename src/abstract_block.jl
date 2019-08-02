@@ -17,15 +17,16 @@ abstract type AbstractBlock{N} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
+
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
 _apply_fallback!(r::AbstractRegister, b::AbstractBlock) = throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
-function _apply_fallback!(r::ArrayReg, b::AbstractBlock)
+function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
     _check_size(r, b)
-    r.state .= mat(b) * r.state
+    r.state .= mat(T, b) * r.state
     return r
 end
 
@@ -58,9 +59,9 @@ end
 """
     occupied_locs(x)
 
-Return an iterator of occupied locations of `x`.
+Return a tuple of occupied locations of `x`.
 """
-@interface occupied_locs(x::AbstractBlock) = 1:nqubits(x)
+@interface occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
 
 """
     subblocks(x)
@@ -81,8 +82,9 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 
 Transform the apply! function of specific block to dense matrix.
 """
-@interface applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
-# just use BlockMap maybe?
+@interface applymatrix(T, g::AbstractBlock) = linop2dense(T, r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
+# just use BlockMap maybe? No!
 
 @interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
