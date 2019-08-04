@@ -22,7 +22,7 @@ end
     st |> g
     for k in 1:32
         if !(st.state[k] ≈ 0.0)
-            @test all(bit(k-1; len=5)[1:2] .== 1)
+            @test all(BitStr{5}(k-1)[1:2] .== 1)
         end
     end
 end
