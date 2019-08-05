@@ -207,11 +207,11 @@ end
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
-    printstyled(io, "mathgate($(m.f); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+    printstyled(io, "mathgate($(m.f); nbits=$N)"; bold=true, color=color(m))
 end
 
 function print_block(io::IO, m::MathGate{N, <:Function}) where N
-    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N)"; bold=true, color=color(m))
 end
 
 function print_block(io::IO, te::TimeEvolution)
