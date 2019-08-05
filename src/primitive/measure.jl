@@ -11,7 +11,7 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::Union{NTuple{K, Int}, AllLocs}
-    collapseto::Union{Int, Nothing}
+    collapseto::Union{BitStr{N}, Nothing}
     remove::Bool
     results::Vector{Int}
     function Measure{N, K, OT, RNG}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT}
@@ -82,7 +82,7 @@ julia> state(r)
 But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
 
 ```jldoctest
-julia> m = Measure(4; collapseto=0b101)
+julia> m = Measure(4; collapseto=bit"0101")
 Measure(4;collapseto=5)
 
 julia> m.collapseto
