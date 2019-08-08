@@ -47,7 +47,7 @@ mathgate(f::Union{LegibleLambda, Function}) = @λ(nbits->matgate(nbits, f))
 
 function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
     nstate = zero(r.state)
-    for b in basis(BitStr{N})
+    for b in basis(BitStr64{N})
         b2 = m.f(b)
         nstate[b2, :] = view(r.state, b, :)
     end
@@ -60,7 +60,7 @@ function mat(::Type{T}, m::MathGate{N}) where {T, N}
     L = 1<<N
     vals = zeros(T, L)
     perm = zeros(Int, L)
-    for b in basis(BitStr{N})
+    for b in basis(BitStr64{N})
         b2 = m.f(b)
         vals[b2] += 1
         perm[b2] = Base.to_index(b)

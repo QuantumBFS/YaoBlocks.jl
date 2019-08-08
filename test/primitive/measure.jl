@@ -22,10 +22,10 @@ end
     st |> g
     for k in 1:32
         if !(st.state[k] ≈ 0.0)
-            @test all(BitStr{5}(k-1)[1:2] .== 1)
+            @test all(BitStr64{5}(k-1)[1:2] .== 1)
         end
     end
-    @test Measure(5; locs=(1, 2), collapseto=0b0011).collapseto isa BitStr{5}
+    @test Measure(5; locs=(1, 2), collapseto=0b0011).collapseto isa BitStr64{5}
 end
 
 @testset "error handling" begin

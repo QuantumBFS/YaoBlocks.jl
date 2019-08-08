@@ -11,7 +11,7 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::Union{NTuple{K, Int}, AllLocs}
-    collapseto::Union{BitStr{N}, Nothing}
+    collapseto::Union{BitStr64{N}, Nothing}
     remove::Bool
     results::Vector{Int}
     function Measure{N, K, OT, RNG}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT}
