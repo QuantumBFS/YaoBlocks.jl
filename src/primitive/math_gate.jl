@@ -49,7 +49,7 @@ function apply!(r::ArrayReg, m::MathGate{N, F}) where {N, F}
     nstate = zero(r.state)
     for b in basis(BitStr64{N})
         b2 = m.f(b)
-        nstate[b2, :] = view(r.state, b, :)
+        nstate[Int64(b2)+1, :] = view(r.state, Int64(b)+1, :)
     end
     r.state .= nstate
     return r
@@ -62,8 +62,8 @@ function mat(::Type{T}, m::MathGate{N}) where {T, N}
     perm = zeros(Int, L)
     for b in basis(BitStr64{N})
         b2 = m.f(b)
-        vals[b2] += 1
-        perm[b2] = Base.to_index(b)
+        vals[Int64(b2)+1] += 1
+        perm[Int64(b2)+1] = Int64(b) + 1
     end
     any(==(0), vals) && throw(ArgumentError("This `MathGate` is not unitary! Failed converting to a `PermMatrix`! maybe use `applymatrix` to check your block?"))
     return PermMatrix(perm, vals)
