@@ -223,6 +223,7 @@ function print_block(io::IO, x::ControlBlock)
     printstyled(io, "control("; bold=true, color=color(ControlBlock))
 
     for i in eachindex(x.ctrl_locs)
+        x.ctrl_config[i] == 0 && printstyled(io, '¬'; bold=true, color=color(ControlBlock))
         printstyled(io, x.ctrl_locs[i]; bold=true, color=color(ControlBlock))
 
         if i != lastindex(x.ctrl_locs)
