@@ -23,7 +23,7 @@ Lazy curried version of `mathgate`.
 
 We can make a classical toffoli gate on quantum register.
 
-```julia
+```jldoctest; setup=:(using YaoBlocks, YaoArrayRegister, BitBasis)
 julia> r = ArrayReg(bit"110")
 ArrayReg{1, Complex{Float64}, Array...}
     active qubits: 3/3
@@ -35,7 +35,7 @@ julia> function toffli(b::BitStr)
 toffli (generic function with 1 method)
 
 julia> g = mathgate(3, toffli)
-mathgate(toffli; nbits=3, bview=bint)
+mathgate(toffli; nbits=3)
 
 julia> apply!(r, g) == ArrayReg(bit"111")
 true
