@@ -53,7 +53,7 @@ Return a [`ControlBlock`](@ref) with number of active qubits `n` and control loc
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> control(4, (1, 2), 3=>X)
 nqubits: 4
 control(1, 2)
@@ -76,7 +76,7 @@ Return a lambda that takes the number of total active qubits as input. See also
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> control((2, 3), 1=>X)
 (n -> control(n, (2, 3), 1 => X gate))
 
@@ -95,7 +95,7 @@ Return a lambda that takes a `Tuple` of control qubits locs as input. See also
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> control(1=>X)
 (ctrl_locs -> control(ctrl_locs, 1 => X gate))
 
@@ -113,7 +113,7 @@ See also [`control`](@ref).
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> control(1, 2)
 (target -> control((1, 2), target))
 ```
@@ -128,7 +128,7 @@ Return a speical [`ControlBlock`](@ref), aka CNOT gate with number of active qub
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> cnot(3, (2, 3), 1)
 nqubits: 3
 control(2, 3)
@@ -143,9 +143,9 @@ cnot(ctrl_locs, loc::Int) = @λ(n -> cnot(n, ctrl_locs, loc))
 
 mat(::Type{T}, c::ControlBlock{N, BT, C}) where {T, N, BT, C} = cunmat(N, c.ctrl_locs, c.ctrl_config, mat(T, c.content), c.locs)
 
-function apply!(r::ArrayReg{B, T}, c::ControlBlock) where {B, T}
+function apply!(r::AbstractRegister, c::ControlBlock)
     _check_size(r, c)
-    instruct!(matvec(r.state), mat(T, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
+    instruct!(r, mat_matchreg(r, c.content), c.locs, c.ctrl_locs, c.ctrl_config)
     return r
 end
 
@@ -153,14 +153,14 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
 
-    @eval function apply!(r::ArrayReg, c::ControlBlock{N, <:$GT}) where N
+    @eval function apply!(r::AbstractRegister, c::ControlBlock{N, <:$GT}) where N
         _check_size(r, c)
-        instruct!(matvec(r.state), Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
+        instruct!(r, Val($(QuoteNode(G))), c.locs, c.ctrl_locs, c.ctrl_config)
         return r
     end
 end
 
-PreserveStyle(::ControlBlock) = PreserveAll()
+PropertyTrait(::ControlBlock) = PreserveAll()
 
 occupied_locs(c::ControlBlock) = (c.ctrl_locs..., map(x->c.locs[x], occupied_locs(c.content))...)
 chsubblocks(pb::ControlBlock{N}, blk::AbstractBlock) where {N} = ControlBlock{N}(pb.ctrl_locs, pb.ctrl_config, blk, pb.locs)

@@ -17,9 +17,16 @@ abstract type AbstractBlock{N} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
+
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
+    _apply_fallback!(r, b)
+end
+
+_apply_fallback!(r::AbstractRegister, b::AbstractBlock) = throw(NotImplementedError(:_apply_fallback!, (r, b)))
+
+function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
     _check_size(r, b)
-    r.state .= mat(b) * r.state
+    r.state .= mat(T, b) * r.state
     return r
 end
 
@@ -52,9 +59,9 @@ end
 """
     occupied_locs(x)
 
-Return an iterator of occupied locations of `x`.
+Return a tuple of occupied locations of `x`.
 """
-@interface occupied_locs(x::AbstractBlock) = 1:nqubits(x)
+@interface occupied_locs(x::AbstractBlock) = (1:nqubits(x)...,)
 
 """
     subblocks(x)
@@ -75,8 +82,9 @@ Change the sub-blocks of a [`CompositeBlock`](@ref) with given iterator `itr`.
 
 Transform the apply! function of specific block to dense matrix.
 """
-@interface applymatrix(g::AbstractBlock) = linop2dense(r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
-# just use BlockMap maybe?
+@interface applymatrix(T, g::AbstractBlock) = linop2dense(T, r->statevec(apply!(ArrayReg(r), g)), nqubits(g))
+applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
+# just use BlockMap maybe? No!
 
 @interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
@@ -92,6 +100,9 @@ Returns the matrix form of given block.
 """
 @interface mat(x::AbstractBlock) = mat(ComplexF64, x)
 @interface mat(::Type{T}, x::AbstractBlock) where T
+
+mat_matchreg(reg::AbstractRegister, x::AbstractBlock) = mat(x)
+mat_matchreg(reg::ArrayReg{B,T}, x::AbstractBlock) where {B,T} = mat(T, x)
 
 Base.Matrix{T}(x::AbstractBlock) where T = Matrix(mat(T, x))
 
@@ -218,7 +229,7 @@ function consume!(d::Dispatcher{<:Symbol}, n::Int)
     d.params
 end
 
-function consume!(d::Dispatcher{<:Number}, n::Int)    
+function consume!(d::Dispatcher{<:Number}, n::Int)
     if n == 0
         return ()
     elseif n == 1
@@ -316,6 +327,6 @@ use the returns of [`parameters`](@ref) as its key.
 """
 @interface cache_key(x::AbstractBlock)
 
-function _check_size(r::ArrayReg, pb::AbstractBlock{N}) where N
+function _check_size(r::AbstractRegister, pb::AbstractBlock{N}) where N
     N == nactive(r) || throw(QubitMismatchError("register size $(nactive(r)) mismatch with block size $N"))
 end

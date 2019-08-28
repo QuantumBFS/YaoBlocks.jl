@@ -62,7 +62,7 @@ Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of block
 Use `kron` to construct a `KronBlock`, it will put an `X` gate on the `1`st qubit,
 and a `Y` gate on the `3`rd qubit.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> kron(4, 1=>X, 3=>Y)
 nqubits: 4
 kron
@@ -84,7 +84,7 @@ the locations on `n` wires in quantum circuits.
 
 You can use kronecker product to composite small blocks to a large blocks.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> kron(X, Y, Z, Z)
 nqubits: 4
 kron
@@ -118,7 +118,7 @@ Return a lambda, which will take the total number of qubits as input.
 
 If you don't know the number of qubit yet, or you are just too lazy, it is fine.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> kron(put(1=>X) for _ in 1:2)
 (n -> kron(n, (n  ->  put(n, 1 => X gate)), (n  ->  put(n, 1 => X gate))))
 
@@ -135,7 +135,7 @@ julia> kron(1=>X, 3=>Y)
 Base.kron(blocks::Pair{Int, <:AbstractBlock}...,) = @λ(n->kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = kron(blocks...)
 
-occupied_locs(k::KronBlock) = Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))
+occupied_locs(k::KronBlock) = (Iterators.flatten(map(x-> x + i - 1, occupied_locs(b)) for (i, b) in zip(k.locs, subblocks(k)))...,)
 subblocks(x::KronBlock) = x.blocks
 chsubblocks(pb::KronBlock{N}, it) where N = KronBlock{N}(pb.locs, collect(it))
 cache_key(x::KronBlock) = [cache_key(each) for each in x.blocks]
@@ -159,20 +159,20 @@ function mat(::Type{T}, k::KronBlock{N}) where {T, N}
     end
 end
 
-function apply!(r::ArrayReg, k::KronBlock)
+function apply!(r::AbstractRegister, k::KronBlock)
     _check_size(r, k)
     for (locs, block) in zip(k.locs, k.blocks)
-        _instruct!(state(r), block, Tuple(locs:locs+nqubits(block)-1))
+        _instruct!(r, block, Tuple(locs:locs+nqubits(block)-1))
     end
     return r
 end
 
-_instruct!(state::AbstractArray{T}, block::AbstractBlock, locs) where T = instruct!(state, mat(T, block), locs)
+_instruct!(reg::AbstractRegister, block::AbstractBlock, locs) = instruct!(reg, mat_matchreg(reg, block), locs)
 
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval _instruct!(state::AbstractArray, block::$GT, locs) = instruct!(state, Val($(QuoteNode(G))), locs)
+    @eval _instruct!(reg::AbstractRegister, block::$GT, locs) = instruct!(reg, Val($(QuoteNode(G))), locs)
 end
 
 function Base.copy(k::KronBlock{N}) where N

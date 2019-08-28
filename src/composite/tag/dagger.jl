@@ -18,7 +18,7 @@ Create a [`Daggered`](@ref) block with given block `x`.
 
 The inverse QFT is not hermitian, thus it will be tagged with a `Daggered` block.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))));
 
 julia> B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n);
@@ -40,7 +40,7 @@ julia> QFT(2)'
 Daggered(x::BT) where {N, BT<:AbstractBlock{N}} =
     Daggered{BT, N}(x)
 
-PreserveStyle(::Daggered) = PreserveAll()
+PropertyTrait(::Daggered) = PreserveAll()
 mat(::Type{T}, blk::Daggered) where T = adjoint(mat(T, content(blk)))
 
 Base.adjoint(x::AbstractBlock) = ishermitian(x) ? x : Daggered(x)

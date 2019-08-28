@@ -71,7 +71,7 @@ function expect(op::AbstractBlock, reg::AbstractRegister{B}) where B
     dropdims(sum(A.*C, dims=1), dims=1) |> conj
 end
 
-function expect(op::Sum, reg::AbstractRegister)
+function expect(op::Add, reg::AbstractRegister)
     sum(opi->expect(opi, reg), op)
 end
 
@@ -79,11 +79,14 @@ function expect(op::Scale, reg::AbstractRegister)
     factor(op)*expect(content(op), reg)
 end
 
-expect(op::Sum, reg::AbstractRegister{1}) = invoke(expect, Tuple{Sum, AbstractRegister}, op, reg)
+expect(op::Add, reg::AbstractRegister{1}) = invoke(expect, Tuple{Add, AbstractRegister}, op, reg)
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale, AbstractRegister}, op, reg)
 
 for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
-    @eval function YaoBase.$FUNC(op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where B
-        $FUNC(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+    @eval function YaoBase.$FUNC(rng::AbstractRNG, op::AbstractBlock, reg::AbstractRegister, locs::AllLocs; kwargs...) where B
+        $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
     end
 end
+
+# obtaining Dense Matrix of a block
+LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))

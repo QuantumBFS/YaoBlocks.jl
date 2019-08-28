@@ -153,10 +153,10 @@ end
 
 # Custom layouts
 color(m::AbstractBlock) = color(typeof(m))
-color(::Type{<:Swap}) = :magenta
 color(::Type{<:ControlBlock}) = :red
 color(::Type{<:ChainBlock}) = :blue
 color(::Type{<:MathGate}) = :red
+color(::Type{<:Add}) = :red
 color(::Type{<:PutBlock}) = :cyan
 color(::Type{T}) where {T <: PauliString} = :cyan
 color(::Type{<:RepeatedBlock}) = :cyan
@@ -168,13 +168,12 @@ color(::Type{<:GeneralMatrixBlock}) = :red
 print_block(io::IO, g::PhaseGate) = print(io, "phase(", g.theta, ")")
 print_block(io::IO, S::ShiftGate) = print(io, "shift(", S.theta, ")")
 print_block(io::IO, R::RotationGate) = print(io, "rot(", content(R), ", ", R.theta, ")")
-print_block(io::IO, swap::Swap) = printstyled(io, "swap", swap.locs; bold=true, color=color(Swap))
 print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold=true, color=color(KronBlock))
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold=true, color=color(ChainBlock))
 print_block(io::IO, x::ReflectGate{N}) where N = print(io, "reflect($(summary(x.psi)))")
 print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
-print_block(io::IO, c::Sum) = printstyled(io, "sum"; bold=true, color=color(ChainBlock))
+print_block(io::IO, c::Add) = printstyled(io, "+"; bold=true, color=color(Add))
 print_block(io::IO, c::TagBlock) = nothing
 print_block(io::IO, c::GeneralMatrixBlock) = printstyled(io, "matblock(...)"; color=color(GeneralMatrixBlock))
 
@@ -187,7 +186,7 @@ function print_block(io::IO, c::Measure{N, K, OT}) where {N, K, OT}
     if c.locations != AllLocs()
         push!(strs, "locs=$(repr(c.locations))")
     end
-    
+
     if c.collapseto !== nothing
         push!(strs, "collapseto=$(c.collapseto)")
     end
@@ -208,22 +207,23 @@ end
 
 # TODO: use OhMyREPL's default syntax highlighting for functions
 function print_block(io::IO, m::MathGate{N, <:LegibleLambda}) where N
-    printstyled(io, "mathgate($(m.f); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+    printstyled(io, "mathgate($(m.f); nbits=$N)"; bold=true, color=color(m))
 end
 
 function print_block(io::IO, m::MathGate{N, <:Function}) where N
-    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N, bview=$(nameof(m.v)))"; bold=true, color=color(m))
+    printstyled(io, "mathgate($(nameof(m.f)); nbits=$N)"; bold=true, color=color(m))
 end
 
 function print_block(io::IO, te::TimeEvolution)
     println(io, "Time Evolution Δt = $(te.dt), tol = $(te.tol)")
-    print_tree(io, content(te.H); title=false)
+    print_tree(io, te.H; title=false)
 end
 
 function print_block(io::IO, x::ControlBlock)
     printstyled(io, "control("; bold=true, color=color(ControlBlock))
 
     for i in eachindex(x.ctrl_locs)
+        x.ctrl_config[i] == 0 && printstyled(io, '¬'; bold=true, color=color(ControlBlock))
         printstyled(io, x.ctrl_locs[i]; bold=true, color=color(ControlBlock))
 
         if i != lastindex(x.ctrl_locs)

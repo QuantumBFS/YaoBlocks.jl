@@ -1,4 +1,5 @@
 using Test, YaoBlocks, YaoArrayRegister
+using YaoBase
 
 struct MockedTag{BT, N} <: TagBlock{BT, N}
     content::BT
@@ -45,4 +46,18 @@ end
     @test cache_key(Scale(Val(-1), X)) == cache_key(Scale(-1, X))
     @test copy(-X) == -X
     @test copy(-X) isa Scale{<:Val}
+end
+
+@testset "properties" begin
+    xg = put(100, 3=>X)
+    yg = put(100, 3=>Y)
+    yg = put(100, 3=>Y)
+    @test_throws Exception !ishermitian(im*xg)
+    @test ishermitian(3*xg)
+    @test_throws Exception !isreflexive(im*xg)
+    @test isreflexive(-1*xg)
+    @test isunitary(im*xg)
+    @test_throws Exception !isunitary(2*xg)
+    @test !iscommute(2*xg, 2*yg)
+    @test iscommute(2*xg, 2*xg)
 end

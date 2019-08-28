@@ -30,7 +30,7 @@ to repeat on given location or on all the locations.
 
 This will create a repeat block which puts 4 X gates on each location.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> repeat(4, X)
 nqubits: 4
 repeat on (1, 2, 3, 4)
@@ -39,7 +39,7 @@ repeat on (1, 2, 3, 4)
 
 You can also specify the location
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> repeat(4, X, (1, 2))
 nqubits: 4
 repeat on (1, 2)
@@ -49,7 +49,7 @@ repeat on (1, 2)
 But repeat won't copy the gate, thus, if it is a gate with parameter, e.g a `phase(0.1)`, the parameter
 will change simultaneously.
 
-```jldoctest
+```jldoctest; setup=:(using YaoBlocks)
 julia> g = repeat(4, phase(0.1))
 nqubits: 4
 repeat on (1, 2, 3, 4)
@@ -82,18 +82,18 @@ Lazy curried version of [`repeat`](@ref).
 """
 Base.repeat(x::AbstractBlock, locs) = @λ(n->repeat(n, x, locs...,))
 
-occupied_locs(x::RepeatedBlock) = Iterators.flatten(k:k+nqubits(x.content)-1 for k in x.locs)
+occupied_locs(rb::RepeatedBlock) = (vcat([(i:i+nqubits(rb.content)-1) for i in rb.locs]...)...,)
 chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where N = RepeatedBlock{N}(blk, x.locs)
-PreserveProperty(x::RepeatedBlock) = PreserveAll()
+PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{N}) where {T, N} = hilbertkron(N, fill(mat(T, rb.content), length(rb.locs)), [rb.locs...])
 mat(::Type{T}, rb::RepeatedBlock{N, 0, GT}) where {T, N, GT} = IMatrix{1<<N, T}()
 
-function apply!(r::ArrayReg{B, T}, rp::RepeatedBlock) where {B, T}
+function apply!(r::AbstractRegister, rp::RepeatedBlock)
     _check_size(r, rp)
-    m  = mat(T, rp.content)
+    m  = mat_matchreg(r, rp.content)
     for addr in rp.locs
-        instruct!(matvec(r.state), m, Tuple(addr:addr+nqubits(rp.content)-1))
+        instruct!(r, m, Tuple(addr:addr+nqubits(rp.content)-1))
     end
     return r
 end
@@ -101,9 +101,9 @@ end
 # specialization
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
-    @eval function apply!(r::ArrayReg, rp::RepeatedBlock{N, C, $GT}) where {N, C}
+    @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N, C, $GT}) where {N, C}
         for addr in rp.locs
-            instruct!(matvec(r.state), Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
+            instruct!(r, Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
         end
         return r
     end
