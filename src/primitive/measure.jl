@@ -1,5 +1,5 @@
 using YaoBase, YaoArrayRegister, Random
-export Measure, AllLocs, ComputationalBasis
+export Measure, AllLocs, ComputationalBasis, choperator
 
 """
     Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
@@ -21,6 +21,15 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
         end
         new{N, K, OT, RNG}(rng, operator, locations, collapseto, remove)
     end
+end
+
+"""
+    choperator(m::Measure, op::AbstractBlock)
+
+change the measuring `operator`. It will also discard existing measuring results.
+"""
+function choperator(m::Measure{N}, op::AbstractBlock) where N
+    Measure(N; rng=m.rng, operator=op, locs=m.locations, collapseto=m.collapseto, remove=m.remove)
 end
 
 function Base.:(==)(m1::Measure, m2::Measure)
