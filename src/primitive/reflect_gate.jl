@@ -15,6 +15,10 @@ Reflection operator to target state `psi`.
 """
 struct ReflectGate{N, T, Tr <: ArrayReg{1, T}} <: PrimitiveBlock{N}
     psi::Tr
+    function ReflectGate{N, T, Tr}(psi) where {N,T,Tr}
+        @warn "`ReflectGate` will be moved to `YaoExtensions.jl` in the next release."
+        new{N, T, Tr}(psi)
+    end
 end
 
 """

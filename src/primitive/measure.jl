@@ -23,6 +23,14 @@ mutable struct Measure{N, K, OT, RNG} <: PrimitiveBlock{N}
     end
 end
 
+function Base.:(==)(m1::Measure, m2::Measure)
+    res = m1.rng == m2.rng && m1.operator == m2.operator &&
+    m1.locations == m2.locations && m1.collapseto == m2.collapseto &&
+    m1.remove == m2.remove
+    res = res && isdefined(m1, :results) == isdefined(m2, :results)
+    res && (!isdefined(m1, :results) || m1.results == m2.results)
+end
+
 @interface nqubits_measured(::Measure{N, K}) where {N, K} = K
 
 """

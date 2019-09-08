@@ -4,6 +4,10 @@ export MathGate, mathgate
 
 struct MathGate{N, F <: Union{LegibleLambda, Function}} <: PrimitiveBlock{N}
     f::F
+    function MathGate{N, F}(f) where {N,F}
+        @warn "`MathGate` will be moved to `YaoExtensions.jl` in the next release."
+        new{N,F}(f)
+    end
 end
 
 function MathGate{N}(f::Union{LegibleLambda, Function}) where N

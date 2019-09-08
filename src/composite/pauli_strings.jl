@@ -4,8 +4,10 @@ export PauliString
 # TODO: expand to Clifford?
 struct PauliString{N, BT <: ConstantGate{1}, VT <: SizedVector{N, BT}} <: CompositeBlock{N}
     blocks::VT
-    PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}} =
+    function PauliString(blocks::SizedVector{N, BT}) where {N, BT <: ConstantGate{1}}
+        @warn "`PauliString` will be moved to `YaoExtensions.jl` in the next release."
         new{N, BT, typeof(blocks)}(blocks)
+    end
 end
 
 # NOTE: PauliString has a fixed size `N`, thus by default, it should use

@@ -15,5 +15,3 @@ function print_subtypetree(t, level=1, indent=4)
         print_subtypetree(s, level+1, indent)
     end
 end
-
-print_blocktree() = print_subtypetree(AbstractBlock)

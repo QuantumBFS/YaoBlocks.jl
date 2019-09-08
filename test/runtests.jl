@@ -42,6 +42,10 @@ end
     include("extending_reg.jl")
 end
 
+@testset "test demos" begin
+    include("treeutils.jl")
+end
+
 # @testset "test demos" begin
 #     include("algo/qft.jl")
 #     include("algo/qcbm.jl")
