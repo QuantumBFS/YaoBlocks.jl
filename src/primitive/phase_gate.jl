@@ -29,7 +29,7 @@ julia> phase(0.1)
 phase(0.1)
 ```
 """
-phase(θ::AbstractFloat) = PhaseGate(θ)
+phase(θ::Real) = PhaseGate(θ)
 
 mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T}()
 
