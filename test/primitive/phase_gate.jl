@@ -5,7 +5,6 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse
     @test PhaseGate(0.1) isa PrimitiveBlock{1}
     @test_throws TypeError PhaseGate{Complex{T}} # will not accept non-real type
     @test phase(T(0.1)) isa PrimitiveBlock{1}
-    @test phase(1) isa PhaseGate{Float64} # default we convert to float64
 end
 
 @testset "test copy" begin

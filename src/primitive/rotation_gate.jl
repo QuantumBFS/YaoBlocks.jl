@@ -23,9 +23,7 @@ mutable struct RotationGate{N, T <: Real, GT <: AbstractBlock{N}} <: PrimitiveBl
     end
 end
 
-RotationGate(block::GT, theta::T) where {N, T <: AbstractFloat, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
-# convert to float if theta is not a floating point
-RotationGate(block::AbstractBlock, theta) = RotationGate(block, Float64(theta))
+RotationGate(block::GT, theta::T) where {N, T <: Real, GT<:AbstractBlock{N}} = RotationGate{N, T, GT}(block, theta)
 
 # bindings
 """

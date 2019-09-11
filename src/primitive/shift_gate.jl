@@ -32,8 +32,7 @@ julia> shift(0.1)
 shift(0.1)
 ```
 """
-shift(θ::AbstractFloat) = ShiftGate(θ)
-shift(θ::Real) = shift(Float64(θ))
+shift(θ::Real) = ShiftGate(θ)
 mat(::Type{T}, gate::ShiftGate) where {T <: Complex} = Diagonal(T[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta
