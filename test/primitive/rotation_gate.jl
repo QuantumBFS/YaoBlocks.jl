@@ -3,7 +3,6 @@ using Test, YaoBlocks, YaoArrayRegister
 @testset "test constructor" for T in [Float16, Float32, Float64]
     # NOTE: type should follow the axis
     @test RotationGate(X, 0.1) isa PrimitiveBlock{1}
-    @test_throws TypeError RotationGate{1, Complex{T}, XGate} # will not accept non-real type
 
     @test Rx(T(0.1)) isa RotationGate{1, T, XGate}
     @test Ry(T(0.1)) isa RotationGate{1, T, YGate}
