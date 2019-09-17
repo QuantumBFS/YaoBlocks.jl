@@ -16,6 +16,8 @@ include("algebra.jl")
 include("blocktools.jl")
 include("layout.jl")
 
+include("autodiff/autodiff.jl")
+
 include("deprecations.jl")
 
 end # YaoBlocks
