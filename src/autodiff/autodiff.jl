@@ -1,6 +1,6 @@
 module AD
 
-using BitBasis, YaoArrayRegister
+using BitBasis, YaoArrayRegister, YaoBase
 using ..YaoBlocks
 
 using SparseArrays, LuxurySparse, LinearAlgebra
