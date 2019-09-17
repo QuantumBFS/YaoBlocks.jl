@@ -1,18 +1,18 @@
 @inline function adjunij!(mat::AbstractMatrix, locs, U::Matrix)
     for j = 1:size(U, 2)
         for i = 1:size(U, 2)
-            U[i,j] += mat[locs[i],locs[j]]
+            @inbounds U[i,j] += mat[locs[i],locs[j]]
         end
     end
     return U
 end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::SparseMatrixCSC)
-    for j = 1:size(U, 2)
+    @inbounds for j = 1:size(U, 2)
         S = U.colptr[j]
         E = U.colptr[j+1]-1
         for ii = S:E
-            U.nzval[ii] += mat[locs[U.rowval[ii]],locs[j]]
+            @inbounds U.nzval[ii] += mat[locs[U.rowval[ii]],locs[j]]
         end
     end
     return U
@@ -24,7 +24,7 @@ end
 end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::Diagonal)
-    for i=1:size(U,1)
+    @inbounds for i=1:size(U,1)
         li = locs[i]
         U.diag[i] += mat[li, li]
     end
@@ -38,7 +38,7 @@ end
 
 @inline function adjunij!(mat::AbstractMatrix, locs, U::PermMatrix)
     for i=1:size(U, 1)
-        U.vals[i] += mat[locs[i], locs[U.perm[i]]]
+        @inbounds U.vals[i] += mat[locs[i], locs[U.perm[i]]]
     end
     return U
 end
