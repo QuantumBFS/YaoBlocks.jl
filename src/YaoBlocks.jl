@@ -17,6 +17,7 @@ include("blocktools.jl")
 include("layout.jl")
 
 include("autodiff/autodiff.jl")
+export AD
 
 include("deprecations.jl")
 

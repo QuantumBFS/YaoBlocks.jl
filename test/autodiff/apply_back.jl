@@ -1,6 +1,6 @@
 using Test
 using YaoBlocks.AD
-using YaoBlocks
+using YaoBlocks, YaoArrayRegister
 using Random
 
 @testset "apply put" begin
@@ -70,8 +70,8 @@ end
     end
 end
 
-A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
-B(n, i) = chain(n, i==j ? put(i=>H) : A(j, i) for j in i:n)
+AA(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
+B(n, i) = chain(n, i==j ? put(i=>H) : AA(j, i) for j in i:n)
 qft(n) = chain(B(n, i) for i in 1:n)
 
 @testset "system test" begin
