@@ -18,7 +18,7 @@ If `pair` is provided, then replace original block with type `ST` with new block
 """
 function replace_block(actor, tree::AbstractBlock)
     res = actor(tree)
-    if res === tree || res isa Nothing # not replaced
+    if res === tree || res === nothing # not replaced
         return chsubblocks(tree, replace_block.(Ref(actor), subblocks(tree)))
     else
         return res

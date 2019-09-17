@@ -98,5 +98,5 @@ end
     @test abs(measure!(X, reg) |> mean) < 0.1
 
     m = Measure(5)
-    @test choperator(m, X) == Measure(5, operator=X)
+    @test chmeasureoperator(m, X) == Measure(5, operator=X)
 end
