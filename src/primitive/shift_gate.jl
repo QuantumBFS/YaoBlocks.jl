@@ -32,7 +32,7 @@ julia> shift(0.1)
 shift(0.1)
 ```
 """
-shift(θ::Real) = ShiftGate(θ)
+shift(θ) = ShiftGate(θ)
 mat(::Type{T}, gate::ShiftGate) where T = Diagonal(T[1.0, exp(im * gate.theta)])
 
 cache_key(gate::ShiftGate) = gate.theta
