@@ -40,6 +40,9 @@ end
     @test chain(put(1=>X))(4) == chain(put(4, 1=>X))
     @test chain(put(1=>X), put(2=>X))(4) == chain(put(4, 1=>X), put(4, 2=>X))
     @test chain()(4) == chain(4)
+
+    @test chain(4, 1=>X) == chain(4, put(1=>X))
+    @test chain(4, put(1=>X), 3=>X) == chain(4, put(1=>X), 3=>X)
 end
 
 @testset "#15" begin

@@ -7,7 +7,8 @@ function parse_block(n::Int, x::AbstractBlock{N}) where N
     return x
 end
 
-parse_block(n::Int, x::Pair{Int, <:AbstractBlock{N}}) where N = x
+# if it is a single qubit pair, parse it to put block
+parse_block(n::Int, x::Pair{Int, <:AbstractBlock{N}}) where N = put(n, x)
 
 """
     prewalk(f, src::AbstractBlock)
