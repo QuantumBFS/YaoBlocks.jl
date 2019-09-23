@@ -1,5 +1,6 @@
 using YaoBase: @interface
 
+parse_block(n::Int, ex) = throw(Meta.ParseError("cannot parse expression $ex, expect a pair or quantum block"))
 parse_block(n::Int, x::Function) = x(n)
 
 function parse_block(n::Int, x::AbstractBlock{N}) where N
