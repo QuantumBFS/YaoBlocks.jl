@@ -17,6 +17,9 @@ include("blocktools.jl")
 include("layout.jl")
 include("treeutils/treeutils.jl")
 
+include("autodiff/autodiff.jl")
+export AD
+
 include("deprecations.jl")
 
 end # YaoBlocks
