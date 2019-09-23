@@ -8,7 +8,14 @@ function parse_block(n::Int, x::AbstractBlock{N}) where N
 end
 
 # if it is a single qubit pair, parse it to put block
-parse_block(n::Int, x::Pair{Int, <:AbstractBlock{N}}) where N = put(n, x)
+parse_block(n::Int, x::Pair{Int, <:AbstractBlock}) = put(n, x)
+# infer the number of qubits if the inner function was curried
+parse_block(n::Int, x::Pair{Int, <:Function}) = put(n, x.first=>parse_block(1, x.second))
+
+# error if it is not single qubit case
+function parse_block(n::Int, x::Pair)
+    throw(Meta.ParseError("please specifiy the block type of $x, consider to use concentrate for large block in local scope."))
+end
 
 """
     prewalk(f, src::AbstractBlock)

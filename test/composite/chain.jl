@@ -43,6 +43,10 @@ end
 
     @test chain(4, 1=>X) == chain(4, put(1=>X))
     @test chain(4, put(1=>X), 3=>X) == chain(4, put(1=>X), 3=>X)
+
+    # this is really a corner case, but I think it make sense to work
+    @test chain(1=>chain()) == chain(1, chain(1))
+    @test_throws Meta.ParseError chain(4, 2:3=>kron(X, X))
 end
 
 @testset "#15" begin
