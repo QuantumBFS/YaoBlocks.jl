@@ -102,7 +102,8 @@ end
 # parametric interface
 niparams(::Type{<:RotationGate}) = 1
 getiparams(x::RotationGate) = x.theta
-setiparams!(r::RotationGate, param::Real) = (r.theta = param; r)
+# no need to specify the type of param, Julia will try to do the conversion
+setiparams!(r::RotationGate, param) where {N, T} = (r.theta = param; r)
 
 YaoBase.isunitary(r::RotationGate) = true
 

@@ -36,7 +36,7 @@ mat(::Type{T}, gate::PhaseGate) where T = exp(T(im * gate.theta)) * IMatrix{2, T
 # parametric interface
 niparams(::Type{<:PhaseGate}) = 1
 getiparams(x::PhaseGate) = x.theta
-setiparams!(r::PhaseGate, param::Real) = (r.theta = param; r)
+setiparams!(r::PhaseGate, param) = (r.theta = param; r)
 
 YaoBase.isunitary(r::PhaseGate) = true
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
