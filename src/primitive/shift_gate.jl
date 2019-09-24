@@ -46,4 +46,6 @@ setiparams!(r::ShiftGate, param) = (r.theta = param; r)
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
 Base.copy(block::ShiftGate{T}) where T = ShiftGate{T}(block.theta)
 Base.:(==)(lhs::ShiftGate, rhs::ShiftGate) = lhs.theta == rhs.theta
-YaoBase.isunitary(r::ShiftGate) = true
+
+# fallback to matrix method if it is not real
+YaoBase.isunitary(r::ShiftGate{<:Real}) = true

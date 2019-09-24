@@ -38,7 +38,8 @@ niparams(::Type{<:PhaseGate}) = 1
 getiparams(x::PhaseGate) = x.theta
 setiparams!(r::PhaseGate, param) = (r.theta = param; r)
 
-YaoBase.isunitary(r::PhaseGate) = true
+# fallback to matrix method if it is not real
+YaoBase.isunitary(r::PhaseGate{<:Real}) = true
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 Base.copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta

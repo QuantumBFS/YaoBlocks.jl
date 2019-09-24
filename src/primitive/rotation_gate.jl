@@ -105,7 +105,8 @@ getiparams(x::RotationGate) = x.theta
 # no need to specify the type of param, Julia will try to do the conversion
 setiparams!(r::RotationGate, param) where {N, T} = (r.theta = param; r)
 
-YaoBase.isunitary(r::RotationGate) = true
+# fallback to matrix methods if it is not real
+YaoBase.isunitary(r::RotationGate{N, <:Real}) where N = true
 
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)
