@@ -46,3 +46,14 @@ end
     g = Rx(0.1) # creates a new one
     @test copy(g) !== g
 end
+
+@testset "isunitary" begin
+    g = Rx(0.1 + 0im)
+    @test @test_nowarn isunitary(g) == true
+
+    g = Rx(0.1 + 1im)
+    @test @test_logs (
+        :warn,
+        "θ in RotationGate is not real, got θ=$(g.theta), fallback to matrix-based method"
+        ) isunitary(g) == false
+end

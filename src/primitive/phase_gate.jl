@@ -40,6 +40,13 @@ setiparams!(r::PhaseGate, param) = (r.theta = param; r)
 
 # fallback to matrix method if it is not real
 YaoBase.isunitary(r::PhaseGate{<:Real}) = true
+
+function YaoBase.isunitary(r::PhaseGate)
+    isreal(r.theta) && return true
+    @warn "θ in phase(θ) is not real, got $(r.theta), fallback to matrix-based method"
+    return isunitary(mat(r))
+end
+
 Base.adjoint(blk::PhaseGate) = PhaseGate(-blk.theta)
 Base.copy(block::PhaseGate{T}) where T = PhaseGate{T}(block.theta)
 Base.:(==)(lhs::PhaseGate, rhs::PhaseGate) = lhs.theta == rhs.theta

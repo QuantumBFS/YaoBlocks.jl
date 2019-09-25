@@ -35,6 +35,12 @@ end
     @test isreflexive(g) == false
     @test isunitary(g) == true
     @test ishermitian(g) == false
+
+    g = ShiftGate{ComplexF64}(0.1 + 0im)
+    @test @test_nowarn isunitary(g) == true
+
+    g = ShiftGate{ComplexF64}(0.1 + 1im)
+    @test @test_logs (:warn, "θ in ShiftGate is not real, got θ=0.1 + 1.0im, fallback to matrix-based method") isunitary(g) == false
 end
 
 @testset "test parameters" begin

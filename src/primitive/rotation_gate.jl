@@ -108,6 +108,12 @@ setiparams!(r::RotationGate, param) where {N, T} = (r.theta = param; r)
 # fallback to matrix methods if it is not real
 YaoBase.isunitary(r::RotationGate{N, <:Real}) where N = true
 
+function YaoBase.isunitary(r::RotationGate)
+    isreal(r.theta) && return true
+    @warn "θ in RotationGate is not real, got θ=$(r.theta), fallback to matrix-based method"
+    return isunitary(mat(r))
+end
+
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)
 Base.:(==)(lhs::RotationGate{TA, GTA}, rhs::RotationGate{TB, GTB}) where {TA, TB, GTA, GTB} = false
