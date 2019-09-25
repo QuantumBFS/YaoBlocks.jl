@@ -103,7 +103,7 @@ end
 niparams(::Type{<:RotationGate}) = 1
 getiparams(x::RotationGate) = x.theta
 # no need to specify the type of param, Julia will try to do the conversion
-setiparams!(r::RotationGate, param) where {N, T} = (r.theta = param; r)
+setiparams!(r::RotationGate, param::Number) where {N, T} = (r.theta = param; r)
 
 # fallback to matrix methods if it is not real
 YaoBase.isunitary(r::RotationGate{N, <:Real}) where N = true

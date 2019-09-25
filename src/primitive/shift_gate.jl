@@ -40,7 +40,7 @@ cache_key(gate::ShiftGate) = gate.theta
 # parametric interface
 niparams(::Type{<:ShiftGate}) = 1
 getiparams(x::ShiftGate) = x.theta
-setiparams!(r::ShiftGate, param) = (r.theta = param; r)
+setiparams!(r::ShiftGate, param::Number) = (r.theta = param; r)
 
 
 Base.adjoint(blk::ShiftGate) = ShiftGate(-blk.theta)
