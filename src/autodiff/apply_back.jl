@@ -157,17 +157,18 @@ function apply_back(st::Tuple{<:ArrayReg, <:ArrayReg}, block::AbstractBlock; kwa
     (in, inδ), col
 end
 
-Base.adjoint(::typeof(expect)) = Adjoint(expect)
-Base.show(io::IO, ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
-Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
-"""
-expect')(op::AbstractBlock, circuit::Pair{<:ArrayReg, <:AbstractBlock})
+# Base.adjoint(::typeof(expect)) = Adjoint(expect)
+# Base.show(io::IO, ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
+# Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof(expect)}) = print(io, "expect'")
 
-"""
-function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:ArrayReg, <:AbstractBlock})
-    reg, c = circuit
-    out = copy(reg) |> c
-    outδ = copy(out) |> op
-    (in, inδ), paramsδ = apply_back((out, outδ), c)
-    return outδ => paramsδ.*2
-end
+# """
+# expect')(op::AbstractBlock, circuit::Pair{<:ArrayReg, <:AbstractBlock})
+
+# """
+# function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:ArrayReg, <:AbstractBlock})
+#     reg, c = circuit
+#     out = copy(reg) |> c
+#     outδ = copy(out) |> op
+#     (in, inδ), paramsδ = apply_back((out, outδ), c)
+#     return outδ => paramsδ.*2
+# end
