@@ -49,7 +49,3 @@ end
 @testset "autodiff" begin
     include("autodiff/autodiff.jl")
 end
-
-@testset "match" begin
-    include("match.jl")
-end

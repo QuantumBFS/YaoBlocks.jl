@@ -6,6 +6,10 @@ block_A(i, j) = control(i, j=>shift(2π/(1<<(i-j+1))))
 block_B(n, i) = chain(n, i==j ? put(i=>H) : block_A(j, i) for j in i:n)
 qft(n) = chain(block_B(n, i) for i in 1:n)
 
+@testset "match" begin
+    include("match.jl")
+end
+
 @testset "map address" begin
     # chain, put, concentrator
     c2 = map_address(chain(5, concentrate(5, put(2,2=>X), (4,1)), put(5, 3=>X)), AddressInfo(10, [2,1,4,6,3]))
