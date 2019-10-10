@@ -6,9 +6,9 @@ import YaoBase: @interface
 export nqubits, isreflexive, isunitary, ishermitian
 
 """
-    AbstractBlock
+    AbstractBlock{N}
 
-Abstract type for quantum circuit blocks.
+Abstract type for quantum circuit blocks. `N` is the number of qubits.
 """
 abstract type AbstractBlock{N} end
 
