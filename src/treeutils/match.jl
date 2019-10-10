@@ -293,6 +293,11 @@ end
 # I use some existing tools, but the performance might not be optimal
 using Combinatorics: permutations
 
+"""
+    ac_match(p, s, θ::BlockMatch) where N
+
+Associative and Communitive match.
+"""
 function ac_match(p::ChainBlock{N}, s::ChainBlock{N}, θ::BlockMatch) where N
     intervals = find_communitive_interval(s)
     isempty(intervals) && return pure_match(p, s, θ)
