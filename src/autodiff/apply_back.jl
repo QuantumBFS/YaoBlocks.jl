@@ -2,6 +2,9 @@ export apply_back!, apply_back
 
 const Rotor{N, T} = Union{RotationGate{N, T}, PutBlock{N, <:Any, <:RotationGate{<:Any, T}}}
 
+as_scalar(arr::AbstractArray{T,0}) where T = arr[]
+as_scalar(arr) = arr
+
 """
     generator(rot::Rotor) -> AbstractBlock
 
@@ -67,7 +70,7 @@ function apply_back!(st, block::PutBlock{N}, collector) where N
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
-    adjmat = outerprod(in, outδ)
+    adjmat = outerprod(outδ, in)
     mat_back!(datatype(in), block, adjmat, collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)
@@ -82,7 +85,7 @@ function apply_back!(st, block::ControlBlock{N}, collector) where N
     adjblock = block'
     in = apply!(out, adjblock)
     #adjm = adjcunmat(outerprod(in, outδ), N, block.ctrl_locs, block.ctrl_config, mat(content(block)), block.locs)
-    adjmat = outerprod(in, outδ)
+    adjmat = outerprod(outδ, in)
     mat_back!(datatype(in),block,adjmat,collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)
@@ -92,7 +95,7 @@ function apply_back!(st, block::Daggered, collector)
     out, outδ = st
     adjblock = block'
     in = apply!(out, adjblock)
-    adjmat = outerprod(outδ, in)
+    adjmat = outerprod(in, outδ)
     mat_back!(datatype(in), content(block),adjmat,collector)
     inδ = apply!(outδ, adjblock)
     return (in, inδ)
@@ -129,7 +132,7 @@ function apply_back!(st, block::RepeatedBlock{N,C}, collector) where {N,C}
     end
     res = Any[]
     st = apply_back!(st, chain(N, [put(loc=>content(block)) for loc in block.locs]), res)
-    res = dropdims(sum(reshape(res, :,C), dims=2), dims=2)
+    res = dropdims(sum(reshape(res, :,C), dims=2), dims=2) |> as_scalar
     prepend!(collector, res)
     return st
 end
@@ -140,7 +143,7 @@ apply_back!(st, block::Measure, collector) = throw(MethodError(apply_back!, (st,
 function backward_params!(st, block::Rotor, collector)
     in, outδ = st
     Σ = generator(block)
-    g = dropdims(sum(conj.(state(in |> Σ)) .* state(outδ), dims=(1,2)), dims=(1,2))
+    g = dropdims(sum(conj.(state(in |> Σ)) .* state(outδ), dims=(1,2)), dims=(1,2)) |> as_scalar
     pushfirst!(collector, -imag(g)/2)
     in |> Σ
     nothing
