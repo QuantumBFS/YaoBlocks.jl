@@ -1,7 +1,7 @@
 using YaoArrayRegister
 using YaoArrayRegister: matvec
 
-export ControlBlock, control, cnot
+export ControlBlock, control, cnot, cz
 
 struct ControlBlock{N, BT<:AbstractBlock, C, M} <: AbstractContainer{BT, N}
     ctrl_locs::NTuple{C, Int}
