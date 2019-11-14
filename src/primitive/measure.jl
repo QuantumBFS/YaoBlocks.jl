@@ -7,19 +7,19 @@ export Measure, AllLocs, ComputationalBasis, chmeasureoperator
 
 Measure operator.
 """
-mutable struct Measure{N, K, OT, RNG,IT<:Integer} <: PrimitiveBlock{N}
+mutable struct Measure{N,K,OT,RNG,IT<:Integer} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
-    locations::Union{NTuple{K, Int}, AllLocs}
-    collapseto::Union{BitStr64{N}, Nothing}
+    locations::Union{NTuple{K,Int},AllLocs}
+    collapseto::Union{BitStr64{N},Nothing}
     remove::Bool
     results::Vector{IT}
-    function Measure{N, K, OT, RNG,IT}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT, IT}
+    function Measure{N,K,OT,RNG,IT}(rng::RNG, operator, locations, collapseto, remove) where {RNG, N, K, OT, IT}
         locations isa AllLocs || @assert_locs_safe N locations
         if collapseto !== nothing && remove == true
             error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
         end
-        new{N, K, OT, RNG, IT}(rng, operator, locations, collapseto, remove)
+        new{N,K,OT,RNG,IT}(rng, operator, locations, collapseto, remove)
     end
 end
 
@@ -28,19 +28,26 @@ end
 
 change the measuring `operator`. It will also discard existing measuring results.
 """
-function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where N
-    Measure(N; rng=m.rng, operator=op, locs=m.locations, collapseto=m.collapseto, remove=m.remove)
+function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where {N}
+    Measure(
+        N;
+        rng = m.rng,
+        operator = op,
+        locs = m.locations,
+        collapseto = m.collapseto,
+        remove = m.remove,
+    )
 end
 
 function Base.:(==)(m1::Measure, m2::Measure)
-    res = m1.rng == m2.rng && m1.operator == m2.operator &&
-    m1.locations == m2.locations && m1.collapseto == m2.collapseto &&
-    m1.remove == m2.remove
+    res = m1.rng == m2.rng &&
+          m1.operator == m2.operator &&
+          m1.locations == m2.locations && m1.collapseto == m2.collapseto && m1.remove == m2.remove
     res = res && isdefined(m1, :results) == isdefined(m2, :results)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
 
-@interface nqubits_measured(::Measure{N, K}) where {N, K} = K
+@interface nqubits_measured(::Measure{N,K}) where {N,K} = K
 
 """
     Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false)
@@ -114,13 +121,29 @@ function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalB
     end
 end
 
-Measure(;rng=Random.GLOBAL_RNG, locs=AllLocs(), operator=ComputationalBasis(), collapseto=nothing, remove=false) where K = @λ(n->Measure(n; rng=rng, locs=locs, operator=operator, collapseto=collapseto, remove=remove))
+Measure(
+    ;
+    rng = Random.GLOBAL_RNG,
+    locs = AllLocs(),
+    operator = ComputationalBasis(),
+    collapseto = nothing,
+    remove = false,
+) where {K} = @λ(
+    n -> Measure(
+        n;
+        rng = rng,
+        locs = locs,
+        operator = operator,
+        collapseto = collapseto,
+        remove = remove,
+    )
+)
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
 function apply!(r::AbstractRegister, m::Measure{N}) where {N}
     _check_size(r, m)
     if m.collapseto !== nothing
-        m.results = measure_collapseto!(m.rng, m.operator, r, m.locations; config=m.collapseto)
+        m.results = measure_collapseto!(m.rng, m.operator, r, m.locations; config = m.collapseto)
     elseif m.remove
         m.results = measure_remove!(m.rng, m.operator, r, m.locations)
     else
