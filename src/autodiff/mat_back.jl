@@ -62,7 +62,7 @@ end
 
 function mat_back!(::Type{T}, rb::ControlBlock{N, C, RT}, adjy, collector) where {T, N, C, RT}
     nparameters(rb) == 0 && return collector
-    adjm = adjcunmat(adjy, N, rb.ctrl_locs, rb.ctrl_config, mat(content(rb)), rb.locs)
+    adjm = adjcunmat(adjy, N, rb.ctrl_locs, rb.ctrl_config, mat(T, content(rb)), rb.locs)
     mat_back!(T, content(rb), adjm, collector)
 end
 
