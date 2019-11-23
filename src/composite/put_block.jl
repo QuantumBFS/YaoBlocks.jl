@@ -82,7 +82,7 @@ function apply!(r::AbstractRegister, pb::PutBlock{N}) where {N}
 end
 
 # specialization
-for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag]
+for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag, :H]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval function apply!(r::AbstractRegister, pb::PutBlock{N,C,<:$GT}) where {N,C}
         _check_size(r, pb)
