@@ -18,7 +18,7 @@ include("layout.jl")
 include("treeutils/treeutils.jl")
 
 include("autodiff/autodiff.jl")
-export AD
+export AD, Optimise
 
 include("deprecations.jl")
 
