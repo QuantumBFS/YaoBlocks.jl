@@ -54,7 +54,8 @@ outerprod(outδ::ArrayReg{B}, in::ArrayReg{B}) where {B} =
 Project `op` to sparse matrix with same sparsity as `y`.
 """
 function projection(y::AbstractMatrix, op::AbstractMatrix)
-    size(y) == size(op) || throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
+    size(y) == size(op) ||
+    throw(DimensionMismatch("can not project a matrix of size $(size(op)) to target size $(size(y))"))
     out = zero(y)
     unsafe_projection!(out, op)
 end
@@ -73,7 +74,7 @@ unsafe_projection!(y::Matrix, adjy, v) = y .+= adjy .* v
 end
 
 @inline function unsafe_projection!(y::PermMatrix, m::AbstractMatrix)
-    for i in 1:size(y, 1)
+    for i = 1:size(y, 1)
         @inbounds y.vals[i] = m[i, y.perm[i]]
     end
     y
