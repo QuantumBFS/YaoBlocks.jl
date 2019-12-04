@@ -51,9 +51,8 @@ function parse_ex(ex, info::ParseInfo)
             :(concentrate($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))),$loc))
         end
         :(begin $(cargs...) end) => begin
-            nbit = info.nbit
             args = filter(x->x!==nothing, [parse_ex(arg, info) for arg in cargs])
-            :(chain([$(args...)]))
+            :(chain($(info.nbit), [$(args...)]))
         end
         :($exloc => $gate) => begin
             loc = render_loc(exloc, info.nbit)
