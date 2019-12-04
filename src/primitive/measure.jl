@@ -113,7 +113,7 @@ julia> m.collapseto
 0101 ₍₂₎
 ```
 """
-function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false, result_dtype=BitStr64{n}) where {OT, RNG}
+function Measure(n::Int; rng::RNG=Random.GLOBAL_RNG, operator::OT=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false, result_dtype=BitStr64{locs isa AllLocs ? n : length(locs)}) where {OT, RNG}
     if locs isa AllLocs
         Measure{n, n, OT, RNG, result_dtype}(rng, operator, locs, collapseto, remove)
     else

@@ -194,7 +194,7 @@ end
 
 function Base.getindex(k::KronBlock, addr)
     index = k.slots[addr]
-    index == 0 && throw(KeyError(addr))
+    index == 0 && return I2
     return k.blocks[index]
 end
 

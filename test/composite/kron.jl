@@ -90,8 +90,8 @@ end
     @test g[2].theta == 0.2
 
     sg = similar(g)
-    @test_throws KeyError sg[2]
-    @test_throws KeyError sg[1]
+    @test sg[2] == I2
+    @test sg[1] == I2
 end
 
 @testset "test insertion" begin

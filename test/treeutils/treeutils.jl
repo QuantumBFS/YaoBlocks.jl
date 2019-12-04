@@ -1,6 +1,7 @@
 using YaoBlocks, Test
 using YaoBlocks.Optimise
 using YaoArrayRegister
+using YaoBlocks: check_dumpload
 
 block_A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
 block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j in i:n)
@@ -155,3 +156,6 @@ end
         kron(Y, Y),
     )
 end
+
+include("dumpload.jl")
+check_dumpload(qft(5))
