@@ -1,11 +1,22 @@
 export dump_gate
 
+"""
+    dump_gate(blk::AbstractBlock) -> Expr
+
+convert a gate to a YaoScript expression for serization.
+The fallback is `GateTypeName(fields...)`
+"""
+function dump_gate(blk::AbstractBlock)
+    vars = [getproperty(blk, x) for x in fieldnames(typeof(blk))]
+    :($(typeof(blk).name.name)($(vars...)))
+end
+
 function dump_gate(blk::ConstantGate)
     Symbol("$(typeof(blk).name)"[1:end-4])
 end
 
 function dump_gate(blk::ControlBlock)
-    pairs = [b=>c for (b,c) in zip(blk.ctrl_locs, blk.ctrl_config)]
+    pairs = [:($b=>C($c)) for (b,c) in zip(blk.ctrl_locs, blk.ctrl_config)]
     :($(pairs...), $(blk.locs) => $(dump_gate(blk.content)))
 end
 
@@ -29,11 +40,6 @@ function dump_gate(blk::TimeEvolution)
     :(time($(blk.dt)) => $(dump_gate(blk.H)))
 end
 
-function dump_gate(blk::AbstractBlock)
-    vars = [getproperty(blk, x) for x in fieldnames(typeof(blk))]
-    :($(typeof(blk))($(vars...)))
-end
-
 function dump_gate(blk::PutBlock)
     :($(blk.locs) => $(dump_gate(blk.content)))
 end
@@ -42,7 +48,11 @@ function dump_gate(blk::KronBlock{N}) where N
     if any(x->nqubits(x)!=1, subblocks(blk))
         error("unsupported multi-qubit in kron while dumping to Yao script.")
     end
-    :(kron($([dump_gate(blk[i]) for i=1:N]...)))
+    if length(occupied_locs(blk)) == N
+        :(kron($([dump_gate(blk[i]) for i=1:N]...)))
+    else
+        :(($([:($i=>$(dump_gate(g))) for (i,g) in blk]...),))
+    end
 end
 
 function dump_gate(blk::RepeatedBlock)
@@ -87,7 +97,6 @@ end
 yaotostring(block::AbstractBlock{N}) where N = Expr(:block, :(nqubits=$N), dump_gate(block))
 function yaotostring(block::ChainBlock{N}) where N
     ex = dump_gate(block)
-    insert!(ex.args, 1, :(nqubits=$N))
-    ex
+    :(let nqubits=$N, version="0.6"; $ex; end)
 end
 yaotofile(filename::String, block) = write(filename, string(yaotostring(block)))

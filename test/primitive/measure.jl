@@ -12,6 +12,8 @@ using StatsBase: mean
     st |> g
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
+    g = Measure(4; locs = (1, 2), collapseto=2)
+    @test g.collapseto isa BitStr64{2}
 end
 
 @testset "collapseto" begin
@@ -25,7 +27,7 @@ end
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
     end
-    @test Measure(5; locs = (1, 2), collapseto = 0b0011).collapseto isa BitStr64{5}
+    @test Measure(5; locs = (1, 2), collapseto = 0b0011).collapseto isa BitStr64{2}
 end
 
 @testset "error handling" begin

@@ -5,8 +5,26 @@ end
 function yaofromstring(x::String)
     ex = Meta.parse(x)
     @match ex begin
-        :(begin $line; nqubits=$n; $(body...) end) => parse_ex(:(begin $(body...) end), n)
-        _ => error("wrong format, expect expression like `begin nqubits=5 ... end`, got $ex")
+        Expr(:let, header, body) => begin
+            info = ParseInfo(-1, "")
+            if header.head != :block
+                header = [header]
+            else
+                header = header.args
+            end
+            for hd in header
+                @match hd begin
+                    :(nqubits=$n) => (info.nbit = Int(n))
+                    :(version=$v) => (info.version = String(v))
+                    _ => error("unknown configuration $header")
+                end
+            end
+            @match body begin
+                :(begin $line; $body end)=>parse_ex(body, info)
+                _ => "do not support multiple blocks in let!, quote them with `begin ... end`."
+            end
+        end
+        _ => error("wrong format, expect expression like `let nqubits=5 GATEDEF end`, got $ex")
     end
 end
 
@@ -18,8 +36,6 @@ mutable struct ParseInfo
     version::String
 end
 
-function gate_expr end
-
 function parse_ex(ex, info::ParseInfo)
     @match ex begin
         :(version = $vnumber) => (info.version = String(vnumber); nothing)
@@ -27,24 +43,23 @@ function parse_ex(ex, info::ParseInfo)
         ::Nothing => nothing
         :($g') => :($(parse_ex(g, info))')
         :($a*$b) => :($(Number(a))*$(parse_ex(b, info)))
-        :(rot($g, $theta)) => :(rot($(parse_ex(g, info)), $(Number(theta))))
-        :(shift($theta)) => :(shift($(Number(theta))))
-        :(phase($theta)) => :(phase($(Number(theta))))
         :(kron($(args...))) => :(kron($(parse_ex.(args, Ref(ParseInfo(1, info.version)))...)))
         :(repeat($(exloc...))=>$g) => begin
             loc = render_loc((exloc...,), info.nbit)
             :(repeat($(info.nbit), $(parse_ex(g, ParseInfo(1, info.version))),$loc))
         end
+        :(cache($g)) => :(cache($(parse_ex(g, info))))
+        :(rot($g, $theta)) => :(rot($(parse_ex(g, info)), $(Number(theta))))
+        :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(Number(dt))))
         :($exloc => Measure) => parse_ex(:($exloc=>Measure(nothing) => nothing), info)
         :($exloc => Measure($op)) => parse_ex(:($exloc => Measure($op) => nothing), info)
-        :($exloc => Measure => $collapseto) => parse_ex(:($exloc => Measure($op) => $collapseto), info)
+        :($exloc => Measure => $collapseto) => parse_ex(:($exloc => Measure(nothing) => $collapseto), info)
         :($exloc => Measure($op) => $collapseto) => begin
             locs = exloc == :ALL ? :(AllLocs()) : render_loc(exloc, info.nbit)
             cb = collapseto === nothing || collapseto == :nothing ? nothing : bit_literal(render_bitstring(collapseto))
-            op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) : parse_ex(op, info)
+            op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) : parse_ex(op, exloc==:ALL ? info : ParseInfo(length(locs), info.version))
             :(Measure($(info.nbit); locs=$locs, operator=$(op), collapseto=$cb))
         end
-        :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(Number(dt))))
         :(+($(args...))) => :(+($(args...)))
         :(focus($(exloc...)) => $g) => begin
             loc = render_loc((exloc...,), info.nbit)
@@ -60,8 +75,12 @@ function parse_ex(ex, info::ParseInfo)
         end
         :($(cargs...), $exloc => $gate) => begin
             loc = render_loc(exloc, info.nbit)
-            cbits = render_cloc.(cargs)
-            :(control($(info.nbit), $cbits, $loc=>$(parse_ex(gate, ParseInfo(length(loc), info.version)))))
+            cbits = render_cloc.(cargs, Ref(info))
+            if cbits[1] isa Integer
+                :(control($(info.nbit), $cbits, $loc=>$(parse_ex(gate, ParseInfo(length(loc), info.version)))))
+            else
+                :(kron($(info.nbit), $(cbits...), $loc=>$(parse_ex(gate, ParseInfo(1, info.version)))))
+            end
         end
         :($f($(args...))) => gate_expr(Val(f), args, info)
 
@@ -85,6 +104,7 @@ render_bitstring(ex) = @match ex begin
         end
     end
     ::Tuple => render_bitstring.(ex)
+    :($(args...),) => (render_bitstring.(args)...,)
     _ => error("expect a bitstring like `1` or `(1,0)`, got $ex")
 end
 
@@ -98,19 +118,48 @@ render_loc(ex, nbit::Int) = @match ex begin
     _ => error("expect a location specification like `2`, `2:5` or `(2,3)`, got $ex")
 end
 
-render_cloc(ex) = @match ex begin
-    ::Number => ex
-    ::Pair{Int,Int} => begin
-        config = ex.second
-        @assert config == 1 || config == 0
-        ex.first * (2*config-1)
-    end
-    :($a=>$b) => begin
-        if a isa Number && b isa Number
-            render_cloc(a=>b)
-        else
-            error("expect a control location specification like `2=>0` or `3[=>1]`, got $ex")
+render_cloc(ex, info) = @match ex begin
+    :($a=>C($b)) => begin
+        if !(b == 1 || b == 0)
+            error("expect a control values `0` or `1`, got $ex")
         end
+        Int(a) * (2*Int(b)-1)
     end
+    :($a=>C) => render_cloc(:($a=>C(1)))
+    :($a=>$g) => :($(Int(a)) => $(parse_ex(g, ParseInfo(1, info.version))))
     _ => error("expect a control location specification like `2=>0` or `3=>1`, got $ex")
+end
+
+"""
+    gate_expr(::Val{G}, args, info)
+
+Obtain the gate constructior from its YaoScript expression.
+`G` is a symbol for the gate type,
+the default constructor is `G(args...)`.
+`info` contains the informations about the number of qubit and Yao version.
+"""
+function gate_expr(::Val{G}, args, info) where G
+    :($G($(render_arg.(args, Ref(info))...)))
+end
+
+render_arg(ex, info) = @match ex begin
+    # locs
+    :($(args...),) => (render_loc.(args, info.nbit)...,)
+    ::Integer => Int(ex)
+    :($a:$b) => Int(a):Int(b)
+    :ALL => (1:nbit...,)
+    :($a:$step:$b) => Int(a):Int(step):Int(b)
+    ::Tuple => Int.(ex)
+
+    # floating point numbers
+    ::Number => Number(ex)
+
+    # Pair of (loc => gate)
+    :($a=>$g) => begin
+        locs = render_loc(a, info.nbit)
+        :($(locs) => $(parse_ex(g, ParseInfo(length(locs), info.version))))
+    end
+
+    # try parse a gate
+    _ => parse_ex(ex, info)
 end
