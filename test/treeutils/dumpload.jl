@@ -41,4 +41,9 @@ end
     yaotofile("_test.yao", y)
     yy = @eval $(yaofromfile("_test.yao"))
     @test y == yy
+
+    g = eval(yaofromfile(joinpath(dirname(@__FILE__), "yaoscript.yao")))
+    s = string(yaotoscript(g))
+    g1 = eval(yaofromstring(s))
+    @test g == g1
 end

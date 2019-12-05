@@ -125,7 +125,7 @@ render_cloc(ex, info) = @match ex begin
         end
         Int(a) * (2*Int(b)-1)
     end
-    :($a=>C) => render_cloc(:($a=>C(1)))
+    :($a=>C) => render_cloc(:($a=>C(1)), info)
     :($a=>$g) => :($(Int(a)) => $(parse_ex(g, ParseInfo(1, info.version))))
     _ => error("expect a control location specification like `2=>0` or `3=>1`, got $ex")
 end

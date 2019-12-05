@@ -1,4 +1,4 @@
-export load_gate, yaotofile, yaotostring
+export load_gate, yaotofile, yaotoscript
 export yaofromfile, yaofromstring, @yao_str
 using MLStyle: @match
 

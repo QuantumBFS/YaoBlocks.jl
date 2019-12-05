@@ -94,9 +94,9 @@ function dump_gate(blk::Concentrator)
     :(focus($(blk.locs...)) => $(dump_gate(blk.content)))
 end
 
-yaotostring(block::AbstractBlock{N}) where N = Expr(:block, :(nqubits=$N), dump_gate(block))
-function yaotostring(block::ChainBlock{N}) where N
+yaotoscript(block::AbstractBlock{N}) where N = Expr(:block, :(nqubits=$N), dump_gate(block))
+function yaotoscript(block::ChainBlock{N}) where N
     ex = dump_gate(block)
     :(let nqubits=$N, version="0.6"; $ex; end)
 end
-yaotofile(filename::String, block) = write(filename, string(yaotostring(block)))
+yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
