@@ -19,10 +19,7 @@ function yaofromstring(x::String)
                     _ => error("unknown configuration $header")
                 end
             end
-            @match body begin
-                :(begin $line; $body end)=>parse_ex(body, info)
-                _ => "do not support multiple blocks in let!, quote them with `begin ... end`."
-            end
+            parse_ex(body |> rmlines, info)
         end
         _ => error("wrong format, expect expression like `let nqubits=5 GATEDEF end`, got $ex")
     end

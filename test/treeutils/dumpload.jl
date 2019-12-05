@@ -29,10 +29,8 @@ end
 @testset "yao macro" begin
     c = yao"""
     let nqubits = 5
-        begin
-            3 => rot(X, 0.3)
-            2 => X
-        end
+        3 => rot(X, 0.3)
+        2 => X
     end
     """
     y = chain(5, put(3=>rot(X, 0.3)), put(2=>X))
