@@ -79,7 +79,7 @@ The return value is a pair of `gψ=>gparams`, with `gψ` the gradient of input s
 """
 @interface function expect(op::AbstractBlock, dm::DensityMatrix{B}) where {B}
     mop = mat(op)
-    [tr(view(dm.state, :, :, i) * mop) for i in 1:B]
+    [tr(view(dm.state, :, :, i) * mop) for i = 1:B]
 end
 
 expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg' * apply!(copy(reg), op)
