@@ -11,6 +11,8 @@ end
     for each in [X, Y, Z, H]
         Matrix{ComplexF64}(each) == Matrix{ComplexF64}(mat(each))
     end
+    @test eltype(mat(chain(X))) == ComplexF64
+    @test eltype(mat(chain(X, Rx(0.5)))) == ComplexF64
 end
 
 @testset "apply lambda" begin
