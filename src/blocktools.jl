@@ -112,7 +112,8 @@ end
 
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
-for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
+for FUNC in [:measure!, :measure_resetto!, :measure_remove!, :measure]
+    rotback = FUNC == :measure! || FUNC == :measure ? :(reg.state = V*reg.state) : :()
     @eval function YaoBase.$FUNC(
         rng::AbstractRNG,
         op::AbstractBlock,
@@ -121,6 +122,14 @@ for FUNC in [:measure!, :measure_collapseto!, :measure_remove!, :measure]
         kwargs...,
     ) where {B}
         $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+    end
+
+    @eval function $FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
+        E, V = op
+        reg.state = V'*reg.state
+        res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
+        $rotback
+        E[Int64.(res) .+ 1]
     end
 end
 
