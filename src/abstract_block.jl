@@ -143,7 +143,7 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, args...) = x
+@interface setiparams!(x::AbstractBlock, args...) = niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
 
 setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) =

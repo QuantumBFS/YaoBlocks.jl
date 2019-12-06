@@ -1,8 +1,10 @@
 using Test, YaoBlocks, YaoArrayRegister
+using YaoBase
 
 @testset "Yao/#186" begin
     @test getiparams(phase(0.1)) == 0.1
     @test getiparams(2 * phase(0.1)) == ()
+    @test_throws NotImplementedError setiparams!(rot(X, 0.5), :nothing)
 end
 
 @testset "block to matrix conversion" begin
