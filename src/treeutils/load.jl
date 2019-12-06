@@ -136,7 +136,7 @@ the default constructor is `G(args...)`.
 `info` contains the informations about the number of qubit and Yao version.
 """
 function gate_expr(::Val{G}, args, info) where G
-    :($G($(render_arg.(args, Ref(info))...)))
+    throw(NotImplementedError("Gate type in YaoScript $G not defined..."))
 end
 
 render_arg(ex, info) = @match ex begin

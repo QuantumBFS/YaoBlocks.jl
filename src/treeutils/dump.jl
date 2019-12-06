@@ -6,10 +6,7 @@ export dump_gate
 convert a gate to a YaoScript expression for serization.
 The fallback is `GateTypeName(fields...)`
 """
-function dump_gate(blk::AbstractBlock)
-    vars = [getproperty(blk, x) for x in fieldnames(typeof(blk))]
-    :($(typeof(blk).name.name)($(vars...)))
-end
+function dump_gate end
 
 function dump_gate(blk::ConstantGate)
     Symbol("$(typeof(blk).name)"[1:end-4])
@@ -100,3 +97,15 @@ function yaotoscript(block::ChainBlock{N}) where N
     Expr(:let, Expr(:block, :(nqubits=$N), :(version="0.6")), ex)
 end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
+
+macro dumpload_fallback(blocktype, fname)
+    quote
+        function dump_gate(blk::$bt)
+            vars = [getproperty(blk, x) for x in fieldnames(typeof(blk))]
+            :($fname($(vars...)))
+        end
+        function gate_expr(::Val{$fname}, args, info)
+            :($fname($(render_arg.(args, Ref(info))...)))
+        end
+    end
+end
