@@ -49,6 +49,7 @@ function chain(n::Int, block::AbstractBlock)
 end
 chain(blocks::Function...) = @λ(n -> chain(n, blocks...))
 chain(it) = chain(it...) # forward iterator to vargs, so we could dispatch based on types
+chain(it::Pair) = error("got $it, do you mean put($it)?")
 chain(blocks...) = @λ(n -> chain(n, blocks))
 
 """
