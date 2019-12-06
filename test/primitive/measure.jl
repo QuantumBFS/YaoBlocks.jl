@@ -14,23 +14,23 @@ using StatsBase: mean
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
 end
 
-@testset "collapseto" begin
+@testset "resetto" begin
     Random.seed!(1234)
 
     st = rand_state(5; nbatch = 3)
-    g = Measure(5; locs = (1, 2), collapseto = bit"00011")
+    g = Measure(5; locs = (1, 2), resetto = bit"00011")
     st |> g
     for k = 1:32
         if !(st.state[k] ≈ 0.0)
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
     end
-    @test Measure(5; locs = (1, 2), collapseto = 0b0011).collapseto isa BitStr64{5}
+    @test Measure(5; locs = (1, 2), resetto = 0b0011).resetto isa BitStr64
 end
 
 @testset "error handling" begin
-    @test_throws ErrorException Measure(5; locs = (1, 2), collapseto = bit"00011", remove = true)
-    @test_throws ErrorException mat(Measure(5; locs = (1, 2), collapseto = bit"00011"))
+    @test_throws ErrorException Measure(5; locs = (1, 2), resetto = bit"00011", remove = true)
+    @test_throws ErrorException mat(Measure(5; locs = (1, 2), resetto = bit"00011"))
 end
 
 
@@ -47,11 +47,11 @@ end
     @test size(res) == (10,)
     @test res2 == res
 
-    # measure_collapseto!
+    # measure_resetto!
     reg2 = reg |> copy
-    res = measure_collapseto!(op, reg2, 2:4)
+    res = measure_resetto!(op, reg2, 2:4)
     reg2 |> repeat(6, H, 2:4)
-    res2 = measure_collapseto!(op, reg2, 2:4)
+    res2 = measure_resetto!(op, reg2, 2:4)
     @test size(res) == (10,) == size(res2)
     @test all(res2 .== 1)
 
@@ -79,11 +79,17 @@ end
     @test size(res) == (32,)
     @test res2 == res
 
-    # measure_collapseto!
+    # measure
     reg2 = reg |> copy
-    res = measure_collapseto!(op, reg2, 2:6)
+    res = measure(op, reg2, 2:6; nshots=100)
+    @test size(res) == (32,)
+    @test reg ≈ reg2
+
+    # measure_resetto!
+    reg2 = reg |> copy
+    res = measure_resetto!(op, reg2, 2:6)
     reg2 |> repeat(8, H, 2:6)
-    res2 = measure_collapseto!(op, reg2, 2:6)
+    res2 = measure_resetto!(op, reg2, 2:6)
     @test size(res) == (32,) == size(res2)
     @test all(res2 .== 1)
 

@@ -124,7 +124,7 @@ for FUNC in [:measure!, :measure_resetto!, :measure_remove!, :measure]
         $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
     end
 
-    @eval function $FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
+    @eval function YaoBase.$FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
         E, V = op
         reg.state = V'*reg.state
         res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
