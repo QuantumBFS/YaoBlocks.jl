@@ -25,7 +25,7 @@ end
 end
 
 @testset "Yao/#166" begin
-    @test_throws ErrorException put(100, 1=>X) |> mat
+    @test_throws ErrorException put(100, 1 => X) |> mat
 end
 
 @testset "dispatch" begin
@@ -42,11 +42,10 @@ end
     include("extending_reg.jl")
 end
 
+@testset "test tree utils" begin
+    include("treeutils.jl")
+end
+
 @testset "autodiff" begin
     include("autodiff/autodiff.jl")
 end
-
-# @testset "test demos" begin
-#     include("algo/qft.jl")
-#     include("algo/qcbm.jl")
-# end

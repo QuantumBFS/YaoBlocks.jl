@@ -13,8 +13,12 @@ Reflection operator to target state `psi`.
 |ψ⟩ → 2 |s⟩⟨s| - 1
 ```
 """
-struct ReflectGate{N, T, Tr <: ArrayReg{1, T}} <: PrimitiveBlock{N}
+struct ReflectGate{N,T,Tr<:ArrayReg{1,T}} <: PrimitiveBlock{N}
     psi::Tr
+    function ReflectGate{N,T,Tr}(psi) where {N,T,Tr}
+        @warn "`ReflectGate` will be moved to `YaoExtensions.jl` in the next release."
+        new{N,T,Tr}(psi)
+    end
 end
 
 """
@@ -22,7 +26,7 @@ end
 
 Create a [`ReflectGate`](@ref) with a quantum register `r`.
 """
-ReflectGate(r::ArrayReg{1, T}) where T = ReflectGate{nqubits(r), T, typeof(r)}(r)
+ReflectGate(r::ArrayReg{1,T}) where {T} = ReflectGate{nqubits(r),T,typeof(r)}(r)
 
 """
     ReflectGate(r::AbstractVector)
@@ -47,25 +51,27 @@ Create a [`ReflectGate`](@ref) with an quantum state vector `v`.
 
 ```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> reflect(rand_state(3))
+┌ Warning: `ReflectGate` will be moved to `YaoExtensions.jl` in the next release.
+└ @ YaoBlocks ~/.julia/dev/YaoBlocks/src/primitive/reflect_gate.jl:19
 reflect(ArrayReg{1, Complex{Float64}, Array...})
 ```
 """
 reflect(v::AbstractVector{<:Complex}) = ReflectGate(v)
 
-function apply!(r::ArrayReg, g::ReflectGate{N, T, <:ArrayReg}) where {N, T}
+function apply!(r::ArrayReg, g::ReflectGate{N,T,<:ArrayReg}) where {N,T}
     v = state(g.psi)
     r.state .= 2 .* (v' * r.state) .* v - r.state
     return r
 end
 
 # target type is the same with block's
-function mat(::Type{T}, r::ReflectGate{N, T}) where {N, T}
+function mat(::Type{T}, r::ReflectGate{N,T}) where {N,T}
     v = statevec(r.psi)
     return 2 * v * v' - IMatrix(length(v))
 end
 
 # different
-function mat(::Type{T1}, r::ReflectGate{N, T2}) where {N, T1, T2}
+function mat(::Type{T1}, r::ReflectGate{N,T2}) where {N,T1,T2}
     M = mat(T2, r)
     return copyto!(similar(M, T1), M)
 end
