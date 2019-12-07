@@ -3,7 +3,7 @@ export Measure, AllLocs, ComputationalBasis, chmeasureoperator
 
 """
     Measure{N, K, OT, RNG, IT<:Integer} <: PrimitiveBlock{N}
-    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, collapseto=nothing, remove=false)
+    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=1:n, resetto=nothing, remove=false)
 
 Measure operator.
 """
@@ -11,21 +11,21 @@ mutable struct Measure{N,K,OT,RNG,IT<:Integer} <: PrimitiveBlock{N}
     rng::RNG
     operator::OT
     locations::Union{NTuple{K,Int},AllLocs}
-    collapseto::Union{BitStr64{K},Nothing}
+    resetto::Union{BitStr64{K},Nothing}
     remove::Bool
     results::Vector{IT}
     function Measure{N,K,OT,RNG,IT}(
         rng::RNG,
         operator,
         locations,
-        collapseto,
+        resetto,
         remove,
     ) where {RNG,N,K,OT,IT}
         locations isa AllLocs || @assert_locs_safe N locations
-        if collapseto !== nothing && remove == true
-            error("invalid keyword combination, expect collapseto or remove, got (collapseto=$collapseto, remove=true)")
+        if resetto !== nothing && remove == true
+            error("invalid keyword combination, expect resetto or remove, got (resetto=$resetto, remove=true)")
         end
-        new{N,K,OT,RNG,IT}(rng, operator, locations, collapseto, remove)
+        new{N,K,OT,RNG,IT}(rng, operator, locations, resetto, remove)
     end
 end
 
@@ -40,7 +40,7 @@ function chmeasureoperator(m::Measure{N}, op::AbstractBlock) where {N}
         rng = m.rng,
         operator = op,
         locs = m.locations,
-        collapseto = m.collapseto,
+        resetto = m.resetto,
         remove = m.remove,
     )
 end
@@ -48,7 +48,7 @@ end
 function Base.:(==)(m1::Measure, m2::Measure)
     res =
         m1.rng == m2.rng && m1.operator == m2.operator &&
-        m1.locations == m2.locations && m1.collapseto == m2.collapseto && m1.remove == m2.remove
+        m1.locations == m2.locations && m1.resetto == m2.resetto && m1.remove == m2.remove
     res = res && isdefined(m1, :results) == isdefined(m2, :results)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
@@ -56,7 +56,7 @@ end
 @interface nqubits_measured(::Measure{N,K}) where {N,K} = K
 
 """
-    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), collapseto=nothing, remove=false)
+    Measure(n::Int; rng=Random.GLOBAL_RNG, operator=ComputationalBasis(), locs=AllLocs(), resetto=nothing, remove=false)
 
 Create a `Measure` block with number of qubits `n`.
 
@@ -109,13 +109,13 @@ julia> state(r)
                 0.0 + 0.0im
 ```
 
-But you can also specify the target bit configuration you want to collapse to with keyword `collapseto`.
+But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.
 
 ```jldoctest; setup=:(using YaoBlocks; using BitBasis)
-julia> m = Measure(4; collapseto=bit"0101")
-Measure(4;collapseto=0101 ₍₂₎)
+julia> m = Measure(4; resetto=bit"0101")
+Measure(4;resetto=0101 ₍₂₎)
 
-julia> m.collapseto
+julia> m.resetto
 0101 ₍₂₎
 ```
 """
@@ -124,14 +124,14 @@ function Measure(
     rng::RNG = Random.GLOBAL_RNG,
     operator::OT = ComputationalBasis(),
     locs = AllLocs(),
-    collapseto = nothing,
+    resetto = nothing,
     remove = false,
     result_dtype = BitStr64{locs isa AllLocs ? n : length(locs)},
 ) where {OT,RNG}
     if locs isa AllLocs
-        Measure{n,n,OT,RNG,result_dtype}(rng, operator, locs, collapseto, remove)
+        Measure{n,n,OT,RNG,result_dtype}(rng, operator, locs, resetto, remove)
     else
-        Measure{n,length(locs),OT,RNG,result_dtype}(rng, operator, tuple(locs...), collapseto, remove)
+        Measure{n,length(locs),OT,RNG,result_dtype}(rng, operator, tuple(locs...), resetto, remove)
     end
 end
 
@@ -139,20 +139,20 @@ Measure(;
     rng = Random.GLOBAL_RNG,
     locs = AllLocs(),
     operator = ComputationalBasis(),
-    collapseto = nothing,
+    resetto = nothing,
     remove = false,
 ) where {K} = @λ(
     n -> Measure(
         n;
-        rng = rng, locs = locs, operator = operator, collapseto = collapseto, remove = remove,
+        rng = rng, locs = locs, operator = operator, resetto = resetto, remove = remove,
     )
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
 function apply!(r::AbstractRegister, m::Measure{N}) where {N}
     _check_size(r, m)
-    if m.collapseto !== nothing
-        m.results = measure_collapseto!(m.rng, m.operator, r, m.locations; config = m.collapseto)
+    if m.resetto !== nothing
+        m.results = measure_resetto!(m.rng, m.operator, r, m.locations; config = m.resetto)
     elseif m.remove
         m.results = measure_remove!(m.rng, m.operator, r, m.locations)
     else

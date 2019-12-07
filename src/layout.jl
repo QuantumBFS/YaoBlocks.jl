@@ -220,8 +220,8 @@ function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
         push!(strs, "locs=$(repr(c.locations))")
     end
 
-    if c.collapseto !== nothing
-        push!(strs, "collapseto=$(c.collapseto)")
+    if c.resetto !== nothing
+        push!(strs, "resetto=$(c.resetto)")
     end
 
     if c.remove

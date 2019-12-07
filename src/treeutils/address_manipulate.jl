@@ -54,7 +54,7 @@ function map_address(blk::Measure, info::AddressInfo)
         rng = blk.rng,
         operator = blk.operator,
         locs = blk.locations / info,
-        collapseto = blk.collapseto,
+        resetto = blk.resetto,
         remove = blk.remove,
     )
     if isdefined(blk, :results)
