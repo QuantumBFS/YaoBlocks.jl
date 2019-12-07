@@ -68,14 +68,14 @@ You can create a `Measure` block on given basis (default is the computational ba
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4)
-Measure(4)
+Measure(4;postprocess=YaoBase.RemoveMeasured())
 ```
 
 Or you could specify which qubits you are going to measure
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> Measure(4; locs=1:3)
-Measure(4;locs=(1, 2, 3))
+Measure(4;locs=(1, 2, 3), postprocess=YaoBase.RemoveMeasured())
 ```
 
 by default this will collapse the current register to measure results.
@@ -97,18 +97,11 @@ julia> state(r)
    -0.19898587237095824 - 0.07607057769761456im
 
 julia> r |> Measure(3)
-Measure(3)
+Measure(3;postprocess=YaoBase.RemoveMeasured())
 
 julia> state(r)
-8×1 Array{Complex{Float64},2}:
-                0.0 + 0.0im
-                0.0 + 0.0im
-                0.0 + 0.0im
-                0.0 + 0.0im
+1×1 Array{Complex{Float64},2}:
  0.7298587746534583 + 0.6835979586433478im
-                0.0 + 0.0im
-                0.0 + 0.0im
-                0.0 + 0.0im
 ```
 
 But you can also specify the target bit configuration you want to collapse to with keyword `resetto`.
