@@ -72,7 +72,6 @@ function dump_gate(blk::Scale)
     :($(factor(blk))*$(dump_gate(blk.content)))
 end
 
-"""not yet complete!"""
 function dump_gate(blk::Measure{N,M}) where {M,N}
     if blk.operator == ComputationalBasis()
         MOP = :(Measure)
