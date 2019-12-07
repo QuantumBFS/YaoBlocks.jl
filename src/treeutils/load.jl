@@ -57,7 +57,7 @@ function parse_ex(ex, info::ParseInfo)
             op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) : parse_ex(op, exloc==:ALL ? info : ParseInfo(length(locs), info.version))
             :(Measure($(info.nbit); locs=$locs, operator=$(op), resetto=$cb))
         end
-        :(+($(args...))) => :(+($(args...)))
+        :(+($(args...))) => :(+($(parse_ex.(args, Ref(info))...)))
         :(focus($(exloc...)) => $g) => begin
             loc = render_loc((exloc...,), info.nbit)
             :(concentrate($(info.nbit), $(parse_ex(g, ParseInfo(length(loc), info.version))),$loc))

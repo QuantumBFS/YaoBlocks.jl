@@ -4,7 +4,8 @@ using YaoBlocks: check_dumpload
 @testset "check_dumpload" begin
     @test check_dumpload(X)
     @test check_dumpload(X + Y)
-    @test check_dumpload(kron(X, Y))
+    @test check_dumpload(+(put(5,4=>X), put(5, 5=>X)))
+    @test check_dumpload(kron(put(1,1=>X), Y))
     @test check_dumpload(kron(5, 2=>X, 4=>Y))
     @test check_dumpload(shift(0.5))
     @test check_dumpload(phase(0.5))
@@ -15,7 +16,7 @@ using YaoBlocks: check_dumpload
     @test check_dumpload(control(5, 1, 2=>rot(X, 0.5)))
     @test check_dumpload(control(5, (1, -4), 2=>rot(X, 0.5)))
     @test check_dumpload(concentrate(5,rot(SWAP, 0.5), (2,5)))
-    @test check_dumpload(repeat(5, X, (2,5)))
+    @test check_dumpload(repeat(5, put(1,1=>X), (2,5)))
     @test check_dumpload(Measure(5))
     @test check_dumpload(Measure(5, operator=put(5,2=>X)))
     @test check_dumpload(Measure(5, locs=(3,1), resetto=bit"01"))
