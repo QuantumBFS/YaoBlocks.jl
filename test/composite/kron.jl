@@ -28,8 +28,11 @@ end
 
 @testset "test constructors" begin
     @test_throws LocationConflictError KronBlock{5}(4=>CNOT, 5=>X)
-    @test_throws ErrorException kron(3, 1=>X, Y)
-    @test_throws ErrorException kron(1:2=>kron(X, Y), Y)
+    @test_throws MethodError kron(3, 1=>X, Y)
+    @test kron(2=>X)(4) == kron(4, 2=>X)
+    @test_throws LocationConflictError kron(10, (2,3)=>CNOT, [3]=>Y)
+    @test kron(10, (2,3)=>CNOT, [5]=>Y) isa KronBlock
+    @test_throws ErrorException kron(5, (5,3)=>CNOT, [3]=>Y)
 end
 
 @testset "test mat" begin

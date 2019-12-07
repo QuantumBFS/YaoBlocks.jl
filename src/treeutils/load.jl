@@ -50,12 +50,12 @@ function parse_ex(ex, info::ParseInfo)
         :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(Number(dt))))
         :($exloc => Measure) => parse_ex(:($exloc=>Measure(nothing) => nothing), info)
         :($exloc => Measure($op)) => parse_ex(:($exloc => Measure($op) => nothing), info)
-        :($exloc => Measure => $collapseto) => parse_ex(:($exloc => Measure(nothing) => $collapseto), info)
-        :($exloc => Measure($op) => $collapseto) => begin
+        :($exloc => Measure => $resetto) => parse_ex(:($exloc => Measure(nothing) => $resetto), info)
+        :($exloc => Measure($op) => $resetto) => begin
             locs = exloc == :ALL ? :(AllLocs()) : render_loc(exloc, info.nbit)
-            cb = collapseto === nothing || collapseto == :nothing ? nothing : bit_literal(render_bitstring(collapseto))
+            cb = resetto === nothing || resetto == :nothing ? nothing : bit_literal(render_bitstring(resetto))
             op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) : parse_ex(op, exloc==:ALL ? info : ParseInfo(length(locs), info.version))
-            :(Measure($(info.nbit); locs=$locs, operator=$(op), collapseto=$cb))
+            :(Measure($(info.nbit); locs=$locs, operator=$(op), resetto=$cb))
         end
         :(+($(args...))) => :(+($(args...)))
         :(focus($(exloc...)) => $g) => begin
@@ -79,7 +79,7 @@ function parse_ex(ex, info::ParseInfo)
                 :(kron($(info.nbit), $(cbits...), $loc=>$(parse_ex(gate, ParseInfo(1, info.version)))))
             end
         end
-        :($f($(args...))) => gate_expr(Val(f), args, info)
+        :($f($(args...))) => gate_expr(Val(Symbol(f)), args, info)
 
         ::LineNumberNode => nothing
         ::Symbol => ex  # const gate
@@ -112,6 +112,7 @@ render_loc(ex, nbit::Int) = @match ex begin
     :ALL => (1:nbit...,)
     :($a:$step:$b) => Int(a):Int(step):Int(b)
     ::Tuple => Int.(ex)
+    ::UnitRange{Int} => ex
     _ => error("expect a location specification like `2`, `2:5` or `(2,3)`, got $ex")
 end
 
@@ -123,7 +124,7 @@ render_cloc(ex, info) = @match ex begin
         Int(a) * (2*Int(b)-1)
     end
     :($a=>C) => render_cloc(:($a=>C(1)), info)
-    :($a=>$g) => :($(Int(a)) => $(parse_ex(g, ParseInfo(1, info.version))))
+    :($a=>$g) => :($(render_loc(a, info.nbit)) => $(parse_ex(g, ParseInfo(1, info.version))))
     _ => error("expect a control location specification like `2=>0` or `3=>1`, got $ex")
 end
 
@@ -136,7 +137,7 @@ the default constructor is `G(args...)`.
 `info` contains the informations about the number of qubit and Yao version.
 """
 function gate_expr(::Val{G}, args, info) where G
-    throw(NotImplementedError("Gate type in YaoScript $G not defined..."))
+    throw(NotImplementedError(:gate_expr, (Val(G), args, info)))
 end
 
 render_arg(ex, info) = @match ex begin

@@ -29,10 +29,9 @@ end
 KronBlock{N}(locs::NTuple{M,UnitRange{Int}}, blocks::MT) where {N,M,MT<:NTuple{M,AbstractBlock}} =
     KronBlock{N,M,MT}(locs, blocks)
 
-function KronBlock{N}(itr::Pair{<:KronLocT,<:AbstractBlock}...) where {N}
+function KronBlock{N}(itr::Pair{<:Any,<:AbstractBlock}...) where {N}
     locs = map(itr) do p
-        x = first(p)
-        x isa UnitRange ? x : x:x
+        _render_kronloc(first(p))
     end
     return KronBlock{N}(locs, last.(itr))
 end
@@ -50,7 +49,7 @@ end
 KronBlock(blk::KronBlock) = copy(blk)
 
 """
-    kron(n, blocks::Pair{Union{Int,UnitRange{Int}}, <:AbstractBlock}...)
+    kron(n, blocks::Pair{<:Any, <:AbstractBlock}...)
 
 Return a [`KronBlock`](@ref), with total number of qubits `n` and pairs of blocks.
 
@@ -68,7 +67,7 @@ kron
 
 ```
 """
-Base.kron(total::Int, blocks::Pair{<:KronLocT,<:AbstractBlock}...) = KronBlock{total}(blocks...)
+Base.kron(total::Int, blocks::Pair{<:Any,<:AbstractBlock}...) = KronBlock{total}(blocks...)
 
 """
     kron(blocks::AbstractBlock...)
@@ -100,19 +99,17 @@ function Base.kron(total::Int, blocks::AbstractBlock...)
     return kron(blocks...)
 end
 
-Base.kron(total::Int, blocks::Union{AbstractBlock,Pair}...) =
-    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
+function _render_kronloc(l)
+    for i=1:length(l)-1
+        l[i+1] == l[i]+1 || error("Non-Contiguous location in Kron!")
+    end
+    l[1]:l[end]
+end
 
 Base.kron(total::Int, blocks::Base.Generator) = kron(total, blocks...)
-
-# handling errors
-Base.kron(blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) =
-    error("location of sparse distributed blocks must be explicit declared with pair (e.g 2=>X)")
-Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{Int, <:AbstractBlock}}...) = kron(blocks...)
-Base.kron(blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
-    error("kron only supports contiguous location, specifiy the first qubit location with an integer, e.g kron(4, 2=>control(2, 2, 1=>X))")
-Base.kron(total::Int, blocks::Union{AbstractBlock, Pair{<:AbstractRange, <:AbstractBlock}}...) =
-    kron(blocks...)
+function Base.kron(total::Int, blocks::Union{Pair{<:Any,<:AbstractBlock},AbstractBlock}...)
+    throw(MethodError(:kron, blocks))
+end
 
 """
     kron(blocks...) -> f(n)
@@ -138,7 +135,7 @@ julia> kron(1=>X, 3=>Y)
 (n -> kron(n, 1 => X gate, 3 => Y gate))
 ```
 """
-Base.kron(blocks::Pair{Int,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
+Base.kron(blocks::Pair{<:Any,<:AbstractBlock}...) = @λ(n -> kron(n, blocks...))
 Base.kron(blocks::Base.Generator) = kron(blocks...)
 
 occupied_locs(k::KronBlock) = (Iterators.flatten(k.locs)...,)
@@ -159,7 +156,7 @@ end
 function apply!(r::AbstractRegister, k::KronBlock)
     _check_size(r, k)
     for (locs, block) in zip(k.locs, k.blocks)
-        _instruct!(r, block, Tuple(locs:locs+nqubits(block)-1))
+        _instruct!(r, block, Tuple(locs))
     end
     return r
 end

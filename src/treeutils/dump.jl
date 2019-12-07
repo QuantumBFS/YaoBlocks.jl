@@ -25,14 +25,6 @@ function dump_gate(blk::RotationGate)
     :(rot($(dump_gate(blk.block)), $(blk.theta)))
 end
 
-function dump_gate(blk::PhaseGate)
-    :(phase($(blk.theta)))
-end
-
-function dump_gate(blk::ShiftGate)
-    :(shift($(blk.theta)))
-end
-
 function dump_gate(blk::TimeEvolution)
     :(time($(blk.dt)) => $(dump_gate(blk.H)))
 end
@@ -79,10 +71,10 @@ function dump_gate(blk::Measure{N,M}) where {M,N}
         MOP = :(Measure($(dump_gate(blk.operator))))
     end
     locs = blk.locations isa AllLocs ? :ALL : blk.locations
-    if blk.collapseto == nothing
+    if blk.resetto == nothing
         :($locs => $MOP)
     else
-        :($locs => $MOP => ($(blk.collapseto...),))
+        :($locs => $MOP => ($(blk.resetto...),))
     end
 end
 
@@ -97,14 +89,24 @@ function yaotoscript(block::ChainBlock{N}) where N
 end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
 
+for (G, F) in [(:ShiftGate, :shift), (:PhaseGate, :phase)]
+    @eval function dump_gate(blk::$G)
+        vars = [getproperty(blk, x) for x in fieldnames(ShiftGate)]
+        :($($(F))($(vars...)))
+    end
+    @eval function gate_expr(::Val{$(QuoteNode(F))}, args, info)
+        :($($F)($(render_arg.(args, Ref(info))...)))
+    end
+end
+
 macro dumpload_fallback(blocktype, fname)
     quote
-        function dump_gate(blk::$bt)
-            vars = [getproperty(blk, x) for x in fieldnames(typeof(blk))]
-            :($fname($(vars...)))
+        function YaoBlocks.dump_gate(blk::$blocktype)
+            vars = [getproperty(blk, x) for x in fieldnames($blocktype)]
+            Expr(:call, $(QuoteNode(fname)), vars...)
         end
-        function gate_expr(::Val{$fname}, args, info)
-            :($fname($(render_arg.(args, Ref(info))...)))
+        function YaoBlocks.gate_expr(::Val{$(QuoteNode(fname))}, args, info)
+            Expr(:call, $(QuoteNode(fname)), render_arg.(args, Ref(info))...)
         end
     end
 end

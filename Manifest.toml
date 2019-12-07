@@ -163,6 +163,8 @@ version = "0.5.2"
 
 [[YaoBase]]
 deps = ["BitBasis", "LegibleLambdas", "LinearAlgebra", "LuxurySparse", "MLStyle", "MacroTools", "Random", "SparseArrays", "Test", "TupleTools"]
-git-tree-sha1 = "e241ca07798e5c2ccbef9edc0d1822dc3296a6ab"
+git-tree-sha1 = "78ac5318105d091d1f7fe447309cead9c8206c16"
+repo-rev = "master"
+repo-url = "https://github.com/QuantumBFS/YaoBase.jl.git"
 uuid = "a8f54c17-34bc-5a9d-b050-f522fe3f755f"
-version = "0.12.1"
+version = "0.12.2"

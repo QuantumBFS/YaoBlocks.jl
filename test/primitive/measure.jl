@@ -12,8 +12,8 @@ using StatsBase: mean
     st |> g
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
-    g = Measure(4; locs = (1, 2), collapseto=2)
-    @test g.collapseto isa BitStr64{2}
+    g = Measure(4; locs = (1, 2), resetto=2)
+    @test g.resetto isa BitStr64{2}
 end
 
 @testset "resetto" begin
@@ -84,7 +84,7 @@ end
     # measure
     reg2 = reg |> copy
     res = measure(op, reg2, 2:6; nshots=100)
-    @test size(res) == (32,)
+    @test size(res) == (100,32)
     @test reg ≈ reg2
 
     # measure_resetto!
