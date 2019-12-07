@@ -71,10 +71,12 @@ function dump_gate(blk::Measure{N,M}) where {M,N}
         MOP = :(Measure($(dump_gate(blk.operator))))
     end
     locs = blk.locations isa AllLocs ? :ALL : blk.locations
-    if blk.resetto == nothing
+    if blk.postprocess isa NoPostProcess
         :($locs => $MOP)
-    else
-        :($locs => $MOP => ($(blk.resetto...),))
+    elseif blk.postprocess isa ResetTo
+        :($locs => $MOP => resetto($(blk.postprocess.x...)))
+    elseif blk.postprocess isa RemoveMeasured
+        :($locs => $MOP => remove)
     end
 end
 

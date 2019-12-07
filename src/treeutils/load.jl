@@ -52,12 +52,18 @@ function parse_ex(ex, info::ParseInfo)
         :(time($dt) => $h) => :(time_evolve($(parse_ex(h, info)), $(Number(dt))))
         :($exloc => Measure) => parse_ex(:($exloc=>Measure(nothing) => nothing), info)
         :($exloc => Measure($op)) => parse_ex(:($exloc => Measure($op) => nothing), info)
-        :($exloc => Measure => $resetto) => parse_ex(:($exloc => Measure(nothing) => $resetto), info)
-        :($exloc => Measure($op) => $resetto) => begin
+        :($exloc => Measure => $post) => parse_ex(:($exloc => Measure(nothing) => $post), info)
+        :($exloc => Measure($op) => $post) => begin
             locs = exloc == :ALL ? :(AllLocs()) : render_loc(exloc, info.nbit)
-            cb = resetto === nothing || resetto == :nothing ? nothing : bit_literal(render_bitstring(resetto))
             op = op isa Nothing || op == :nothing ? :(ComputationalBasis()) : parse_ex(op, exloc==:ALL ? info : ParseInfo(length(locs), info.version))
-            :(Measure($(info.nbit); locs=$locs, operator=$(op), resetto=$cb))
+            @match post begin
+                ::Nothing || :nothing => :(Measure($(info.nbit); locs=$locs, operator=$(op)))
+                :(resetto($(rbits...))) => begin
+                        cb = bit_literal(render_bitstring.(rbits)...)
+                        :(Measure($(info.nbit); locs=$locs, operator=$(op), resetto=$cb))
+                    end
+                :remove => :(Measure($(info.nbit); locs=$locs, operator=$(op), remove=true))
+            end
         end
         :(+($(args...))) => :(+($(parse_ex.(args, Ref(info))...)))
         :(focus($(exloc...)) => $g) => begin

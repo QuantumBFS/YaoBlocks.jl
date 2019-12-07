@@ -132,25 +132,48 @@ end
 
 expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
-for FUNC in [:measure!, :measure_resetto!, :measure_remove!, :measure]
-    rotback = FUNC == :measure! || FUNC == :measure ? :(reg.state = V*reg.state) : :()
-    @eval function YaoBase.$FUNC(
-        rng::AbstractRNG,
-        op::AbstractBlock,
-        reg::AbstractRegister,
-        locs::AllLocs;
-        kwargs...,
-    ) where {B}
-        $FUNC(rng::AbstractRNG, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
-    end
+function YaoBase.measure(
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...) where {B}
+    measure(eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+end
 
-    @eval function YaoBase.$FUNC(rng::AbstractRNG, op::Eigen, reg::AbstractRegister, locs::AllLocs; kwargs...)
-        E, V = op
-        reg.state = V'*reg.state
-        res = $FUNC(rng, ComputationalBasis(), reg, locs; kwargs...)
-        $rotback
-        E[Int64.(res) .+ 1]
+function YaoBase.measure!(
+    postprocess::YaoBase.PostProcess,
+    op::AbstractBlock,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...) where {B}
+    measure!(postprocess, eigen!(mat(op) |> Matrix), reg, locs; kwargs...)
+end
+
+function YaoBase.measure!(
+    postprocess::YaoBase.PostProcess,
+    op::Eigen,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...)
+    E, V = op
+    reg.state = V'*reg.state
+    res = measure!(postprocess, ComputationalBasis(), reg, locs; kwargs...)
+    if postprocess isa YaoBase.NoPostProcess
+        reg.state = V*reg.state
     end
+    E[Int64.(res) .+ 1]
+end
+
+function YaoBase.measure(
+    op::Eigen,
+    reg::AbstractRegister,
+    locs::AllLocs;
+    kwargs...)
+    E, V = op
+    reg.state = V'*reg.state
+    res = measure(ComputationalBasis(), reg, locs; kwargs...)
+    reg.state = V*reg.state
+    E[Int64.(res) .+ 1]
 end
 
 # obtaining Dense Matrix of a block

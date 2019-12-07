@@ -49,13 +49,11 @@ function map_address(block::AbstractBlock, info::AddressInfo)
 end
 
 function map_address(blk::Measure, info::AddressInfo)
-    m = Measure(
-        info.nbits;
-        rng = blk.rng,
-        operator = blk.operator,
-        locs = blk.locations / info,
-        resetto = blk.resetto,
-        remove = blk.remove,
+    m = Measure{info.nbits}(
+        blk.rng,
+        blk.operator,
+        (blk.locations / info...,),
+        blk.postprocess
     )
     if isdefined(blk, :results)
         m.results = blk.results

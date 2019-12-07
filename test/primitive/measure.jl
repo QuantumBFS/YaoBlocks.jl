@@ -13,7 +13,7 @@ using StatsBase: mean
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
     g = Measure(4; locs = (1, 2), resetto=2)
-    @test g.resetto isa BitStr64{2}
+    @test g.postprocess isa ResetTo{BitStr64{2}}
 end
 
 @testset "resetto" begin
@@ -27,7 +27,7 @@ end
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
     end
-    @test Measure(5; locs = (1, 2), resetto = 0b0011).resetto isa BitStr64
+    @test Measure(5; locs = (1, 2), resetto = 0b0011).postprocess isa ResetTo{BitStr64{2}}
 end
 
 @testset "error handling" begin
@@ -51,15 +51,15 @@ end
 
     # measure_resetto!
     reg2 = reg |> copy
-    res = measure_resetto!(op, reg2, 2:4)
+    res = measure!(ResetTo(0), op, reg2, 2:4)
     reg2 |> repeat(6, H, 2:4)
-    res2 = measure_resetto!(op, reg2, 2:4)
+    res2 = measure!(ResetTo(0), op, reg2, 2:4)
     @test size(res) == (10,) == size(res2)
     @test all(res2 .== 1)
 
     # measure_remove!
     reg2 = reg |> copy
-    res = measure_remove!(op, reg2, 2:4)
+    res = measure!(RemoveMeasured(), op, reg2, 2:4)
     reg2 |> repeat(3, H, 2:3)
     @test size(res) == (10,)
     @test nqubits(reg2) == 3
@@ -89,15 +89,15 @@ end
 
     # measure_resetto!
     reg2 = reg |> copy
-    res = measure_resetto!(op, reg2, 2:6)
+    res = measure!(ResetTo(0), op, reg2, 2:6)
     reg2 |> repeat(8, H, 2:6)
-    res2 = measure_resetto!(op, reg2, 2:6)
+    res2 = measure!(ResetTo(0), op, reg2, 2:6)
     @test size(res) == (32,) == size(res2)
     @test all(res2 .== 1)
 
     # measure_remove!
     reg2 = reg |> copy
-    res = measure_remove!(op, reg2, 2:6)
+    res = measure!(RemoveMeasured(), op, reg2, 2:6)
     @test size(res) == (32,)
 
     reg = repeat(ArrayReg([1, -1 + 0im] / sqrt(2.0)), 10)
