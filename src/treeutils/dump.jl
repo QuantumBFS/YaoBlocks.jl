@@ -101,8 +101,8 @@ end
 
 macro dumpload_fallback(blocktype, fname)
     quote
-        function YaoBlocks.dump_gate(blk::$blocktype)
-            vars = [getproperty(blk, x) for x in fieldnames($blocktype)]
+        function YaoBlocks.dump_gate(blk::$(esc(blocktype)))
+            vars = [getproperty(blk, x) for x in fieldnames($(esc(blocktype)))]
             Expr(:call, $(QuoteNode(fname)), vars...)
         end
         function YaoBlocks.gate_expr(::Val{$(QuoteNode(fname))}, args, info)
