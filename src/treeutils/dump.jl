@@ -92,12 +92,13 @@ end
 yaotofile(filename::String, block) = write(filename, string(yaotoscript(block)))
 
 for (G, F) in [(:ShiftGate, :shift), (:PhaseGate, :phase)]
+    fname = QuoteNode(F)
     @eval function dump_gate(blk::$G)
         vars = [getproperty(blk, x) for x in fieldnames(ShiftGate)]
-        :($($(F))($(vars...)))
+        Expr(:call, $fname, vars...)
     end
     @eval function gate_expr(::Val{$(QuoteNode(F))}, args, info)
-        :($($F)($(render_arg.(args, Ref(info))...)))
+        Expr(:call, $fname, render_arg.(args, Ref(info))...)
     end
 end
 
