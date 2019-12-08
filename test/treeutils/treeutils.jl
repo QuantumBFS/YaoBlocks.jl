@@ -1,10 +1,11 @@
 using YaoBlocks, Test
 using YaoBlocks.Optimise
 using YaoArrayRegister
+using YaoBlocks: check_dumpload
 
 block_A(i, j) = control(i, j => shift(2π / (1 << (i - j + 1))))
-block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j = i:n)
-qft(n) = chain(block_B(n, i) for i = 1:n)
+block_B(n, i) = chain(n, i == j ? put(i => H) : block_A(j, i) for j in i:n)
+qft(n) = chain(block_B(n, i) for i in 1:n)
 
 @testset "map address" begin
     # chain, put, concentrator
@@ -129,7 +130,7 @@ end
         chain(put(10, 8 => X), put(10, 7 => Z)),
         Measure(10, operator = X, locs = 6),
     )
-    c2 = chain(10, chain(10, [put(10, i => H) for i = 1:10]), sub2)
+    c2 = chain(10, chain(10, [put(10, i => H) for i in 1:10]), sub2)
     @test simplify(c, rules = [to_basictypes]) == c2
 
     # subroutine, chain, put, kron and control
@@ -155,3 +156,6 @@ end
         chain(put(2, 2 => X), put(2, 1 => Z), kron(X, Y)),
     ) == chain(put(2, 2 => Y), put(2, 1 => Z), kron(Y, Y))
 end
+
+include("dumpload.jl")
+check_dumpload(qft(5))

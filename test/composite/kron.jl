@@ -13,7 +13,7 @@ end
 function rand_kron_test(n; gateset)
     firstn = rand(1:n)
     locs = randperm(n)
-    blocks = [rand(gateset) for i = 1:firstn]
+    blocks = [rand(gateset) for i in 1:firstn]
     seq = [i => each for (i, each) in zip(locs[1:firstn], blocks)]
     mats = Any[i => mat(each) for (i, each) in zip(locs[1:firstn], blocks)]
     append!(mats, [i => IMatrix(2) for i in locs[firstn+1:end]])
@@ -28,7 +28,11 @@ end
 
 @testset "test constructors" begin
     @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 5 => X)
-    @test_throws ErrorException kron(3, 1 => X, Y)
+    @test_throws MethodError kron(3, 1 => X, Y)
+    @test kron(2 => X)(4) == kron(4, 2 => X)
+    @test_throws LocationConflictError kron(10, (2, 3) => CNOT, [3] => Y)
+    @test kron(10, (2, 3) => CNOT, [5] => Y) isa KronBlock
+    @test_throws ErrorException kron(5, (5, 3) => CNOT, [3] => Y)
 end
 
 @testset "test mat" begin
@@ -50,9 +54,10 @@ end
         @test chsubblocks(g, blks) |> subblocks |> collect == blks
 
         m = kron(U2, Const.I2, U, Const.I2)
-        g = KronBlock{5}(4 => CNOT, 2 => X)
+        @test_throws LocationConflictError KronBlock{5}(4 => CNOT, 2 => X)
+        g = KronBlock{5}(4:5 => CNOT, 2 => X)
         @test m == mat(g)
-        @test g.locs == [2, 4]
+        @test g.locs == (2:2, 4:5)
         @test occupied_locs(g) == (2, 4, 5)
     end
 
@@ -68,49 +73,35 @@ end
         @test m == mat(g)
     end
 
-    @testset "random dense sequence, n=$i" for i = 2:8
+    @testset "random dense sequence, n=$i" for i in 2:8
         @test random_dense_kron(i; gateset = TestGateSet)
     end
 
-    @testset "random mat sequence, n=$i" for i = 4:8
+    @testset "random mat sequence, n=$i" for i in 4:8
         @test rand_kron_test(i; gateset = TestGateSet)
     end
 end
 
 @testset "test allocation" begin
     g = kron(4, 1 => X, 2 => phase(0.1))
-    # deep copy
-    cg = deepcopy(g)
-    cg[2].theta = 0.2
-    @test g[2].theta == 0.1
 
-    # shallow copy
+    # copy
     cg = copy(g)
     cg[2].theta = 0.2
-    @test g[2].theta == 0.2
+    @test g[2].theta == 0.1
+    @test cg[2].theta == 0.2
 
-    sg = similar(g)
-    @test_throws KeyError sg[2]
-    @test_throws KeyError sg[1]
-end
-
-@testset "test insertion" begin
-    g = KronBlock{4}(1 => X, 2 => phase(0.1))
-    g[4] = rot(X, 0.2)
-    @test g[4].theta == 0.2
-
-    g[2] = Y
-    @test mat(g[2]) == mat(Y)
+    @test cache_key(cg) != cache_key(g)
 end
 
 @testset "test iteration" begin
     g = kron(5, 1 => X, 3 => Y, 4 => rot(X, 0.0), 5 => rot(Y, 0.0))
-    for (src, tg) in zip(g, [1 => X, 3 => Y, 4 => rot(X, 0.0), 5 => rot(Y, 0.0)])
+    for (src, tg) in zip(g, [1:1 => X, 3:3 => Y, 4:4 => rot(X, 0.0), 5:5 => rot(Y, 0.0)])
         @test src[1] == tg[1]
         @test src[2] == tg[2]
     end
 
-    for (src, tg) in zip(eachindex(g), [1, 3, 4, 5])
+    for (src, tg) in zip(eachindex(g), [1:1, 3:3, 4:4, 5:5])
         @test src == tg
     end
 end

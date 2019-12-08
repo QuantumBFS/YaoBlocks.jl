@@ -19,7 +19,7 @@ _charwidth(s) = sum(map(textwidth, collect(s)))
 print prefix of a tree node in a single line.
 """
 function print_prefix(io::IO, depth, charset, active_levels)
-    for current_depth = 2:depth
+    for current_depth in 2:depth
         if current_depth in active_levels
             print(io, charset.skip, " "^(_charwidth(charset.dash) + 1))
         else
@@ -220,12 +220,8 @@ function print_block(io::IO, c::Measure{N,K,OT}) where {N,K,OT}
         push!(strs, "locs=$(repr(c.locations))")
     end
 
-    if c.collapseto !== nothing
-        push!(strs, "collapseto=$(c.collapseto)")
-    end
-
-    if c.remove
-        push!(strs, "remove=true")
+    if !(c.postprocess isa NoPostProcess)
+        push!(strs, "postprocess=$(c.postprocess)")
     end
 
     out = join(strs, ", ")
