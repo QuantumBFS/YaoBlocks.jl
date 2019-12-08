@@ -1,5 +1,11 @@
 using MLStyle
 
+"""
+    @yao_str
+    yao"..."
+
+The mark up language for quantum circuit.
+"""
 macro yao_str(str::String)
     yaofromstring(str)
 end
