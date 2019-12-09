@@ -89,12 +89,7 @@ function apply!(r::AbstractRegister, x::UnitaryChannel)
 end
 
 function mat(::Type{T}, x::UnitaryChannel) where T
-    ws = sum(x.weights)
-    out = x.weights[1] / ws * mat(T, first(x.operators))
-    for k in 2:length(x.operators)
-        out += x.weights[k] / ws * mat(T, x.operators[k])
-    end
-    return out
+    error("unitary channel can not have a matrix")
 end
 
 subblocks(x::UnitaryChannel) = x.operators

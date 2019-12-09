@@ -8,9 +8,7 @@ using Test
 end
 
 @testset "check mat" begin
-    mat(UnitaryChannel([X, Y, Z], [1, 0, 0])) == mat(X)
-    mat(UnitaryChannel([X, Y, Z], [0, 1, 0])) == mat(Y)
-    mat(UnitaryChannel([X, Y, Z], [0, 1, 1])) == mat(Y + Z)/2
+    @test_throws ErrorException mat(UnitaryChannel([X, Y, Z], [1, 0, 0]))
 end
 
 @testset "check compare" begin
