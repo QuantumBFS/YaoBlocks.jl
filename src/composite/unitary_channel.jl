@@ -79,7 +79,7 @@ end
 
 subblocks(x::UnitaryChannel) = x.operators
 chsubblocks(x::UnitaryChannel{N}, it) where {N} = UnitaryChannel{N}(collect(it), x.weights)
-occupied_locs(x::UnitaryChannel) = union(occupied_locs(x.operators)...)
+occupied_locs(x::UnitaryChannel) = union(occupied_locs.(x.operators)...)
 
 function cache_key(x::UnitaryChannel)
     key = hash(x.weights)
