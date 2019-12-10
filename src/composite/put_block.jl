@@ -1,3 +1,4 @@
+using StatsBase
 export PutBlock, put, Swap, swap, PSwap, pswap
 
 """
@@ -38,14 +39,14 @@ julia> put(4, (1, 3)=>kron(X, Y))
 nqubits: 4
 put on (1, 3)
 └─ kron
-   ├─ 1=>X gate
-   └─ 2=>Y gate
+   ├─ 1:1=>X gate
+   └─ 2:2=>Y gate
 ```
 
 The outter locations creates a scope which make it seems to be a contiguous two qubits for the block inside `PutBlock`.
 
 !!! tips
-    It is better to use [`concentrate`](@ref) instead of `put` for large blocks, since put will use the matrix of its contents
+    It is better to use [`subroutine`](@ref) instead of `put` for large blocks, since put will use the matrix of its contents
     directly instead of making use of what's in it. `put` is more efficient for small blocks.
 """
 put(total::Int, pa::Pair{NTuple{M,Int},<:AbstractBlock}) where {M} =
@@ -81,6 +82,8 @@ function apply!(r::AbstractRegister, pb::PutBlock{N}) where {N}
     return r
 end
 
+# NOTE: Roger: these specialization should be removed after the new interpret
+# mechanism is implemented
 # specialization
 for G in [:X, :Y, :Z, :T, :S, :Sdag, :Tdag, :H]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
@@ -159,7 +162,10 @@ parametrized swap gate.
 pswap(n::Int, i::Int, j::Int, α::Real) = PSwap{n}((i, j), α)
 pswap(i::Int, j::Int, α::Real) = n -> pswap(n, i, j, α)
 
-for (G, GT) in [
+for (
+    G,
+    GT,
+) in [
     (:Rx, :(PutBlock{N,1,RotationGate{1,T,XGate}} where {N,T})),
     (:Ry, :(PutBlock{N,1,RotationGate{1,T,YGate}} where {N,T})),
     (:Rz, :(PutBlock{N,1,RotationGate{1,T,ZGate}} where {N,T})),

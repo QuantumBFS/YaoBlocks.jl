@@ -12,10 +12,10 @@ using LinearAlgebra: tr
     @test expect(obs2, ghz) ≈ 0
     @test expect(obs3, ghz) ≈ 1
 
-    @test expect(obs3, zero_state(4) => kron(H, H, H, H)) ≈ expect(
+    @test expect(
         obs3,
-        zero_state(4) |> kron(H, H, H, H),
-    )
+        zero_state(4) => kron(H, H, H, H),
+    ) ≈ expect(obs3, zero_state(4) |> kron(H, H, H, H))
     @test expect(obs1 + obs2 + obs3, ghz) ≈ 1
     @test expect(obs1 + obs2 + obs3, repeat(ghz, 3)) ≈ [1, 1, 1]
     @test expect(2 * obs3, ghz) ≈ 2
@@ -52,16 +52,17 @@ end
 end
 
 @testset "expect" begin
-    reg = rand_state(3, nbatch = 10)
-    e1 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2) |> ρ)
-    e2 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2))
-    e3 = expect(put(3, 2 => X), reg |> ρ)
-    e4 = expect(put(3, 2 => X), reg)
-    e5 = expect(put(3, 2 => -X), reg)
-    @test e1 ≈ e2
-    @test e1 ≈ e3
-    @test e1 ≈ e4
-    @test e5 ≈ -e4
+    for reg in [rand_state(3, nbatch = 10), rand_state(3, nbatch = 10, no_transpose_storage = true)]
+        e1 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2) |> ρ)
+        e2 = expect(put(2, 2 => X), reg |> copy |> focus!(1, 2))
+        e3 = expect(put(3, 2 => X), reg |> ρ)
+        e4 = expect(put(3, 2 => X), reg)
+        e5 = expect(put(3, 2 => -X), reg)
+        @test e1 ≈ e2
+        @test e1 ≈ e3
+        @test e1 ≈ e4
+        @test e5 ≈ -e4
+    end
 end
 
 @testset "viewbatch apply" begin

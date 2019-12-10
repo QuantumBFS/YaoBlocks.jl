@@ -20,8 +20,8 @@ end
     include("repeated.jl")
 end
 
-@testset "test concentrate" begin
-    include("concentrator.jl")
+@testset "test subroutine" begin
+    include("subroutine.jl")
 end
 
 @testset "test tag" begin
@@ -31,6 +31,10 @@ end
 
 @testset "test pauli string" begin
     include("pauli_string.jl")
+end
+
+@testset "test unitary channel" begin
+    include("unitary_channel.jl")
 end
 
 @testset "test single block chsubblocks" begin

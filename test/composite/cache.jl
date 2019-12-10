@@ -2,11 +2,9 @@ using Test, YaoBlocks, YaoArrayRegister, LuxurySparse, CacheServers
 
 @testset "constructor" begin
     @test CacheFragment(X) isa CacheFragment{XGate,UInt8,Any}
-    @test CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}(X) isa CacheFragment{
-        XGate,
-        Int,
-        PermMatrix{ComplexF64,Int},
-    }
+    @test CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}(
+        X,
+    ) isa CacheFragment{XGate,Int,PermMatrix{ComplexF64,Int}}
     @test CacheFragment{XGate,Int}(X) isa CacheFragment{XGate,Int,Any}
 end
 
@@ -51,7 +49,7 @@ end
 end
 
 @testset "direct inherited methods" begin
-    g = kron(4, 1 => X, 3 => Y)
+    g = chain([X, Z, Y, I2])
     g = CachedBlock(test_server, g, 2)
 
     @test g[1] isa XGate

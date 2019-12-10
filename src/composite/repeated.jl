@@ -13,11 +13,13 @@ end
 
 function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C,Int}) where {N,M,C}
     @assert_locs_safe N Tuple(i:i+M-1 for i in locs)
+    M > 1 && throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
     return RepeatedBlock{N,C,typeof(block)}(block, locs)
 end
 
 function RepeatedBlock{N}(block::AbstractBlock{M}, locs::UnitRange{Int}) where {N,M}
     (0 < locs.start) && (locs.stop <= N) || throw(LocationConflictError("locations conflict."))
+    M > 1 && throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
     return RepeatedBlock{N,length(locs),typeof(block)}(block, Tuple(locs))
 end
 
@@ -108,9 +110,7 @@ end
 for G in [:X, :Y, :Z, :S, :T, :Sdag, :Tdag]
     GT = Expr(:(.), :ConstGate, QuoteNode(Symbol(G, :Gate)))
     @eval function apply!(r::AbstractRegister, rp::RepeatedBlock{N,C,$GT}) where {N,C}
-        for addr in rp.locs
-            instruct!(r, Val($(QuoteNode(G))), Tuple(addr:addr+nqubits(rp.content)-1))
-        end
+        instruct!(r, Val($(QuoteNode(G))), rp.locs)
         return r
     end
 end

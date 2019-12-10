@@ -224,7 +224,7 @@ function cunmat(
     ns = diff(U.colptr) |> autostatic
     Ns = ones(Int, N)
     controldo(ic) do i
-        @inbounds Ns[locs_raw .+ i] = ns
+        @inbounds Ns[locs_raw.+i] = ns
     end
     @inbounds @simd for j in 1:N
         colptr[j+1] = colptr[j] + Ns[j]

@@ -4,6 +4,7 @@ using Test, YaoBlocks, YaoArrayRegister
     # NOTE: type should follow the axis
     @test RotationGate(X, 0.1) isa PrimitiveBlock{1}
 
+    @test Rx(1) isa RotationGate{1,Float64,XGate}
     @test Rx(T(0.1)) isa RotationGate{1,T,XGate}
     @test Ry(T(0.1)) isa RotationGate{1,T,YGate}
     @test Rz(T(0.1)) isa RotationGate{1,T,ZGate}
@@ -11,7 +12,10 @@ end
 
 @testset "test matrix" begin
     theta = 2.0
-    for (DIRECTION, MAT) in [
+    for (
+        DIRECTION,
+        MAT,
+    ) in [
         (X, [cos(theta / 2) -im * sin(theta / 2); -im * sin(theta / 2) cos(theta / 2)]),
         (Y, [cos(theta / 2) -sin(theta / 2); sin(theta / 2) cos(theta / 2)]),
         (Z, [exp(-im * theta / 2) 0; 0 exp(im * theta / 2)]),

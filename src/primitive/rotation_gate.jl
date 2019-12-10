@@ -25,6 +25,8 @@ end
 
 RotationGate(block::GT, theta::T) where {N,T,GT<:AbstractBlock{N}} =
     RotationGate{N,T,GT}(block, theta)
+RotationGate(block::GT, theta::Integer) where {N,GT<:AbstractBlock{N}} =
+    RotationGate{N,Float64,GT}(block, Float64(theta))
 
 # bindings
 """
@@ -77,6 +79,7 @@ Return a [`RotationGate`](@ref) on U axis.
 rot(axis::AbstractBlock, theta) = RotationGate(axis, theta)
 
 content(x::RotationGate) = x.block
+chcontent(x::RotationGate, gen::AbstractBlock) = RotationGate(gen, x.theta)
 # General definition
 function mat(::Type{T}, R::RotationGate{N}) where {N,T}
     I = IMatrix{1 << N,T}()
