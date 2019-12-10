@@ -204,7 +204,7 @@ print_block(io::IO, x::KronBlock) = printstyled(io, "kron"; bold = true, color =
 print_block(io::IO, x::ChainBlock) = printstyled(io, "chain"; bold = true, color = color(ChainBlock))
 print_block(io::IO, x::UnitaryChannel) = printstyled(io, "unitary_channel"; bold=true)
 print_block(io::IO, x::ReflectGate{N}) where {N} = print(io, "reflect($(summary(x.psi)))")
-print_block(io::IO, c::Concentrator) = print(io, "Concentrator: ", occupied_locs(c))
+print_block(io::IO, c::Subroutine) = print(io, "Subroutine: ", occupied_locs(c))
 print_block(io::IO, c::CachedBlock) = print_block(io, content(c))
 print_block(io::IO, c::Add) = printstyled(io, "+"; bold = true, color = color(Add))
 print_block(io::IO, c::TagBlock) = nothing
