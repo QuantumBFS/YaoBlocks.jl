@@ -99,7 +99,8 @@ end
 
 
 function mat(::Type{T}, x::UnitaryChannel) where T
-    error("unitary channel can not have a matrix")
+    U = sample(x.operators, x.weights)
+    return mat(T, U)
 end
 
 subblocks(x::UnitaryChannel) = x.operators
