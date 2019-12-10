@@ -1,4 +1,4 @@
-using YaoBlocks
+using YaoBlocks, YaoArrayRegister
 using Random, Test
 
 @testset "identity gate" begin
