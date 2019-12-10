@@ -5,9 +5,6 @@ using Test
     r = rand_state(1)
     channel = UnitaryChannel([X, Y, Z], [1, 0, 0])
     @test apply!(copy(r), channel) == apply!(copy(r), X)
-
-    r = rand_state(3)
-    @test apply!(copy(r), put(3, 1=>channel)) == apply!(copy(r), put(3, 1=>X))
 end
 
 @testset "check mat" begin

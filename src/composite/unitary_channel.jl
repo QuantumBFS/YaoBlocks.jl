@@ -90,11 +90,7 @@ end
 
 # unitary channel
 function apply!(r::AbstractRegister, pb::PutBlock{N, C, <:UnitaryChannel}) where {N, C}
-    _check_size(r, pb)
-    x = pb.content
-    U = sample(x.operators, x.weights)
-    apply!(r, PutBlock{N}(U, pb.locs))
-    return r
+    error("unitary channel has to be on the top of the circuit tree")
 end
 
 
