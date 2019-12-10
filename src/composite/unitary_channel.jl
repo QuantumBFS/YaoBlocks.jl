@@ -88,12 +88,6 @@ function apply!(r::AbstractRegister, x::UnitaryChannel)
     apply!(r, sample(x.operators, x.weights))
 end
 
-# unitary channel
-function apply!(r::AbstractRegister, pb::PutBlock{N, C, <:UnitaryChannel}) where {N, C}
-    error("unitary channel has to be on the top of the circuit tree")
-end
-
-
 function mat(::Type{T}, x::UnitaryChannel) where T
     U = sample(x.operators, x.weights)
     return mat(T, U)
