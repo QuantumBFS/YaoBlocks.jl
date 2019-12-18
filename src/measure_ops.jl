@@ -19,6 +19,13 @@ function eigenbasis(op::AbstractBlock{N}) where {N}
     end
 end
 
+for BT in [:ChainBlock]
+    @eval function eigenbasis(op::$BT)
+        @warn "eigenbasis on blocktype `$($BT)` calls into the fallback implementation, which might be slow. Try using `kron`, `repeat` if items commute to each oher."
+        invoke(eigenbasis, Tuple{AbstractBlock}, op)
+    end
+end
+
 for GT in [:PutBlock, :RepeatedBlock, :ControlBlock, :Daggered]
     @eval function eigenbasis(op::$GT)
         E, V = eigenbasis(content(op))
