@@ -212,6 +212,8 @@ end
 function YaoBase.iscommute(x::ControlBlock{N}, y::ControlBlock{N}) where {N}
     if x.locs == y.locs
         return iscommute(x.content, y.content)
+    elseif !any(l->l in y.ctrl_locs, x.locs) &&  !any(l->l in x.ctrl_locs, y.locs)
+        return true
     else
         return iscommute_fallback(x, y)
     end
