@@ -70,9 +70,9 @@ function (::Adjoint{Any,typeof(operator_fidelity)})(
     U1 = mat(b1)
     U2 = mat(b2)
     @static if isdefined(LuxurySparse, :hadamard_product)
-        sum(LuxurySparse.hadamard_product(conj(U1), U2))
+        s = sum(LuxurySparse.hadamard_product(conj(U1), U2))
     else
-        sum(conj(U1) .* U2)
+        s = sum(conj(U1) .* U2)
     end
     adjs = conj(s)/abs(s)/size(U1,1)
     adjm1 = U2*adjs
