@@ -114,3 +114,7 @@ end
     @test isunitary(g) == true
     @test isreflexive(g) == true
 end
+
+@testset "empty kron" begin
+    @test mat(kron(5)) == mat(chain(5)) == IMatrix{1<<5}()
+end
