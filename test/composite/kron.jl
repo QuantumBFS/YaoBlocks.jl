@@ -116,5 +116,6 @@ end
 end
 
 @testset "empty kron" begin
-    @test mat(kron(5)) == mat(chain(5)) == IMatrix{1<<5}()
+    T = Float64
+    @test mat(T,kron(5)) === mat(T,chain(5)) == IMatrix{1<<5,Float64}()
 end
