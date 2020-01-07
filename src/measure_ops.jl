@@ -150,23 +150,3 @@ function measure(ab::Add, reg::AbstractRegister, locs::AllLocs; kwargs...)
         measure(op, reg, locs; kwargs...)
     end
 end
-
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs; kwargs...) where {N}
-    _check_msize(op, reg, locs)
-
-    # get eigen basis
-    E, V = eigenbasis(op)
-    ai = AddressInfo(nactive(reg), locs)
-    _E = map_address(E, ai)
-    _V = map_address(V, ai)
-    _reg = copy(reg) |> _V'
-
-    # perform equivalent measure
-    E = diag(mat(content(_E)))
-    res = measure(ComputationalBasis(), _reg, _E.locs; kwargs...)
-    map(ri -> E[Int64(ri)+1], res)
-end
-
-function measure(op::PutBlock{N}, reg::AbstractRegister, locs::AllLocs; kwargs...) where {N}
-    invoke(measure, Tuple{PutBlock,AbstractRegister,Any}, op, reg, locs; kwargs...)
-end
