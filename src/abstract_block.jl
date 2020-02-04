@@ -3,7 +3,7 @@ export AbstractBlock
 using YaoBase, YaoArrayRegister, SimpleTraits
 import YaoBase: @interface
 
-export nqubits, isreflexive, isunitary, ishermitian
+export nqubits, isreflexive, isunitary, ishermitian, apply_zero
 
 """
     AbstractBlock
@@ -17,10 +17,16 @@ abstract type AbstractBlock{N} end
 
 Apply a block (of quantum circuit) to a quantum register.
 """
-
 @interface function apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
+
+"""
+    apply!(block)
+
+Apply a block (of quantum circuit) to a quantum register set to zero state.
+"""
+apply_zero(b::AbstractBlock) = apply!(zero_state(nqubits(b)), b)
 
 _apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
     throw(NotImplementedError(:_apply_fallback!, (r, b)))
