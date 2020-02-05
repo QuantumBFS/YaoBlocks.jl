@@ -25,7 +25,7 @@ end
     st = rand_state(5; nbatch = 3)
     g = Measure(5; locs = (1, 2), resetto = bit"00011")
     st |> g
-    for k in 1:32
+    for k = 1:32
         if !(st.state[k] ≈ 0.0)
             @test all(BitStr64{5}(k - 1)[1:2] .== 1)
         end
@@ -34,7 +34,12 @@ end
 end
 
 @testset "error handling" begin
-    @test_throws ErrorException Measure(5; locs = (1, 2), resetto = bit"00011", remove = true)
+    @test_throws ErrorException Measure(
+        5;
+        locs = (1, 2),
+        resetto = bit"00011",
+        remove = true,
+    )
     @test_throws ErrorException mat(Measure(5; locs = (1, 2), resetto = bit"00011"))
 end
 

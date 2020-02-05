@@ -46,7 +46,8 @@ Base.adjoint(op::OuterProduct) = OuterProduct(conj(op.right), conj(op.left))
 
 outerprod(left::AbstractVector, right::AbstractVector) = OuterProduct(left, right)
 outerprod(left::AbstractMatrix, right::AbstractMatrix) = OuterProduct(left, right)
-outerprod(outδ::ArrayReg{1}, in::ArrayReg{1}) = outerprod(statevec(outδ), conj(statevec(in)))
+outerprod(outδ::ArrayReg{1}, in::ArrayReg{1}) =
+    outerprod(statevec(outδ), conj(statevec(in)))
 outerprod(outδ::ArrayReg{B}, in::ArrayReg{B}) where {B} =
     outerprod(statevec(outδ), conj(statevec(in)))
 
@@ -77,7 +78,7 @@ unsafe_projection!(y::Matrix, adjy, v) = y .+= adjy .* v
 end
 
 @inline function unsafe_projection!(y::PermMatrix, m::AbstractMatrix)
-    for i in 1:size(y, 1)
+    for i = 1:size(y, 1)
         @inbounds y.vals[i] = m[i, y.perm[i]]
     end
     y

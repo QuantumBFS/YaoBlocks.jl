@@ -55,7 +55,8 @@ Walk the tree and call `f` after the children are visited.
     return f(src)
 end
 
-@interface blockfilter!(f, v::Vector, blk::AbstractBlock) = postwalk(x -> f(x) ? push!(v, x) : v, blk)
+@interface blockfilter!(f, v::Vector, blk::AbstractBlock) =
+    postwalk(x -> f(x) ? push!(v, x) : v, blk)
 
 @interface blockfilter(f, blk) = blockfilter!(f, [], blk)
 
@@ -70,7 +71,8 @@ Return a [`ChainBlock`](@ref) with all block of `block_type` in root.
 #@interface expect(op::AbstractBlock, r::AbstractRegister) = r' * apply!(copy(r), op)
 
 #expect(op::AbstractBlock, dm::DensityMatrix) = mapslices(x->sum(mat(op).*x)[], dm.state, dims=[1,2]) |> vec
-expect(op::AbstractBlock, dm::DensityMatrix{1}) = sum(mat(op) .* dropdims(dm.state, dims = 3))
+expect(op::AbstractBlock, dm::DensityMatrix{1}) =
+    sum(mat(op) .* dropdims(dm.state, dims = 3))
 
 """
     expect(op::AbstractBlock, reg) -> Vector
@@ -93,7 +95,7 @@ For register input, the return value is a register.
 """
 @interface function expect(op::AbstractBlock, dm::DensityMatrix{B}) where {B}
     mop = mat(op)
-    [tr(view(dm.state, :, :, i) * mop) for i in 1:B]
+    [tr(view(dm.state, :, :, i) * mop) for i = 1:B]
 end
 
 expect(op::AbstractBlock, reg::AbstractRegister{1}) = reg' * apply!(copy(reg), op)
@@ -134,7 +136,8 @@ function expect(op, plan::Pair{<:AbstractRegister,<:AbstractBlock})
     expect(op, copy(plan.first) |> plan.second)
 end
 
-expect(op::Scale, reg::AbstractRegister{1}) = invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
+expect(op::Scale, reg::AbstractRegister{1}) =
+    invoke(expect, Tuple{Scale,AbstractRegister}, op, reg)
 
 # obtaining Dense Matrix of a block
 LinearAlgebra.Matrix(blk::AbstractBlock) = Matrix(mat(blk))

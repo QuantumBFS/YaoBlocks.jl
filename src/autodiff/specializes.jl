@@ -1,10 +1,14 @@
 for F in [:expect, :fidelity, :operator_fidelity]
     @eval Base.adjoint(::typeof($F)) = Adjoint($F)
     @eval Base.show(io::IO, ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
-    @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) = print(io, "$($F)'")
+    @eval Base.show(io::IO, ::MIME"text/plain", ::Adjoint{Any,typeof($F)}) =
+        print(io, "$($F)'")
 end
 
-function (::Adjoint{Any,typeof(expect)})(op::AbstractBlock, circuit::Pair{<:ArrayReg,<:AbstractBlock})
+function (::Adjoint{Any,typeof(expect)})(
+    op::AbstractBlock,
+    circuit::Pair{<:ArrayReg,<:AbstractBlock},
+)
     reg, c = circuit
     out = copy(reg) |> c
     outδ = copy(out) |> op

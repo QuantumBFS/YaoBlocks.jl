@@ -37,7 +37,12 @@ function Measure{N}(
 end
 
 const MeasureAndReset{N,K,OT,LT,RNG} = Measure{N,K,OT,LT,ResetTo{BitStr64{K}},RNG}
-function MeasureAndReset(N, resetto = 0; operator = ComputationalBasis, rng = Random.GLOBAL_RNG)
+function MeasureAndReset(
+    N,
+    resetto = 0;
+    operator = ComputationalBasis,
+    rng = Random.GLOBAL_RNG,
+)
     Measure(N; postprocess = ResetTo(resetto), operator = operator, rng = rng, locs = locs)
 end
 
@@ -52,8 +57,8 @@ end
 
 function Base.:(==)(m1::Measure, m2::Measure)
     res =
-        m1.rng == m2.rng &&
-        m1.operator == m2.operator && m1.locations == m2.locations && m1.postprocess == m2.postprocess
+        m1.rng == m2.rng && m1.operator == m2.operator &&
+        m1.locations == m2.locations && m1.postprocess == m2.postprocess
     res = res && isdefined(m1, :results) == isdefined(m2, :results)
     res && (!isdefined(m1, :results) || m1.results == m2.results)
 end
@@ -153,11 +158,14 @@ Measure(;
     resetto = nothing,
     remove = false,
 ) where {K} = @λ(
-    n -> Measure(n; rng = rng,
+    n -> Measure(
+        n;
+        rng = rng,
         locs = locs,
         operator = operator,
         resetto = resetto,
-        remove = remove)
+        remove = remove,
+    )
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
