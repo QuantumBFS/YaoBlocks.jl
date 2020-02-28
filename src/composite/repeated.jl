@@ -19,7 +19,8 @@ function RepeatedBlock{N}(block::AbstractBlock{M}, locs::NTuple{C,Int}) where {N
 end
 
 function RepeatedBlock{N}(block::AbstractBlock{M}, locs::UnitRange{Int}) where {N,M}
-    (0 < locs.start) && (locs.stop <= N) || throw(LocationConflictError("locations conflict."))
+    (0 < locs.start) && (locs.stop <= N) ||
+    throw(LocationConflictError("locations conflict."))
     M > 1 &&
     throw(ArgumentError("RepeatedBlock does not support multi-qubit content for the moment."))
     return RepeatedBlock{N,length(locs),typeof(block)}(block, Tuple(locs))
@@ -78,7 +79,8 @@ repeat on (1, 2, 3, 4)
 ```
 """
 Base.repeat(n::Int, x::AbstractBlock, locs::Int...) = repeat(n, x, locs)
-Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C,Int}) where {C} = RepeatedBlock{n}(x, locs)
+Base.repeat(n::Int, x::AbstractBlock, locs::NTuple{C,Int}) where {C} =
+    RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock, locs) = repeat(n, x, locs...)
 Base.repeat(n::Int, x::AbstractBlock, locs::UnitRange) = RepeatedBlock{n}(x, locs)
 Base.repeat(n::Int, x::AbstractBlock) = RepeatedBlock{n}(x)
@@ -91,8 +93,10 @@ Lazy curried version of [`repeat`](@ref).
 """
 Base.repeat(x::AbstractBlock, locs) = @λ(n -> repeat(n, x, locs...))
 
-occupied_locs(rb::RepeatedBlock) = (vcat([(i:i+nqubits(rb.content)-1) for i in rb.locs]...)...,)
-chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where {N} = RepeatedBlock{N}(blk, x.locs)
+occupied_locs(rb::RepeatedBlock) =
+    (vcat([(i:i+nqubits(rb.content)-1) for i in rb.locs]...)...,)
+chsubblocks(x::RepeatedBlock{N}, blk::AbstractBlock) where {N} =
+    RepeatedBlock{N}(blk, x.locs)
 PropertyTrait(x::RepeatedBlock) = PreserveAll()
 
 mat(::Type{T}, rb::RepeatedBlock{N}) where {T,N} =
@@ -121,7 +125,8 @@ apply!(reg::AbstractRegister, rp::RepeatedBlock{N,0}) where {N} = reg
 
 cache_key(rb::RepeatedBlock) = (rb.locs, cache_key(rb.content))
 
-Base.adjoint(blk::RepeatedBlock{N}) where {N} = RepeatedBlock{N}(adjoint(blk.content), blk.locs)
+Base.adjoint(blk::RepeatedBlock{N}) where {N} =
+    RepeatedBlock{N}(adjoint(blk.content), blk.locs)
 Base.copy(x::RepeatedBlock{N}) where {N} = RepeatedBlock{N}(x.content, x.locs)
 Base.:(==)(A::RepeatedBlock, B::RepeatedBlock) = A.locs == B.locs && A.content == B.content
 

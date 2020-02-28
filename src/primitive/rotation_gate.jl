@@ -120,7 +120,8 @@ end
 
 Base.adjoint(blk::RotationGate) = RotationGate(blk.block, -blk.theta)
 Base.copy(R::RotationGate) = RotationGate(R.block, R.theta)
-Base.:(==)(lhs::RotationGate{TA,GTA}, rhs::RotationGate{TB,GTB}) where {TA,TB,GTA,GTB} = false
+Base.:(==)(lhs::RotationGate{TA,GTA}, rhs::RotationGate{TB,GTB}) where {TA,TB,GTA,GTB} =
+    false
 Base.:(==)(lhs::RotationGate{TA,GT}, rhs::RotationGate{TB,GT}) where {TA,TB,GT} =
     lhs.theta == rhs.theta
 

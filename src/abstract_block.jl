@@ -88,7 +88,8 @@ Transform the apply! function of specific block to dense matrix.
 applymatrix(g::AbstractBlock) = applymatrix(ComplexF64, g)
 # just use BlockMap maybe? No!
 
-@interface print_block(io::IO, blk::AbstractBlock) = print_block(io, MIME("text/plain"), blk)
+@interface print_block(io::IO, blk::AbstractBlock) =
+    print_block(io, MIME("text/plain"), blk)
 print_block(blk::AbstractBlock) = print_block(stdout, blk)
 print_block(io::IO, ::MIME"text/plain", blk::AbstractBlock) = summary(io, blk)
 
@@ -115,7 +116,8 @@ YaoBase.nqubits(x::AbstractBlock{N}) where {N} = nqubits(typeof(x))
 # properties
 for each_property in [:isunitary, :isreflexive, :ishermitian]
     @eval YaoBase.$each_property(x::AbstractBlock) = $each_property(mat(x))
-    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} = $each_property(mat(T))
+    @eval YaoBase.$each_property(::Type{T}) where {T<:AbstractBlock} =
+        $each_property(mat(T))
 end
 
 function iscommute_fallback(op1::AbstractBlock{N}, op2::AbstractBlock{N}) where {N}
@@ -143,10 +145,11 @@ Returns the intrinsic parameters of node `block`, default is an empty tuple.
 
 Set the parameters of `block`.
 """
-@interface setiparams!(x::AbstractBlock, args...) =
-    niparams(x) == length(args) == 0 ? x : throw(NotImplementedError(:setiparams!, (x, args...)))
+@interface setiparams!(x::AbstractBlock, args...) = niparams(x) == length(args) == 0 ? x :
+    throw(NotImplementedError(:setiparams!, (x, args...)))
 
-setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) = setiparams!(x, it...)
+setiparams!(x::AbstractBlock, it::Union{Tuple,AbstractArray,Base.Generator}) =
+    setiparams!(x, it...)
 setiparams!(x::AbstractBlock, a::Number, xs::Number...) =
     error("setparams!(x, θ...) is not implemented")
 setiparams!(x::AbstractBlock, it::Symbol) = setiparams!(x, render_params(x, it))
@@ -165,7 +168,8 @@ setiparams!(f::Nothing, x::AbstractBlock, it) = setiparams!(x, it)
 
 Set the parameters to a given symbol, which can be :zero, :random.
 """
-setiparams!(f::Function, x::AbstractBlock, it::Symbol) = setiparams!(f, x, render_params(x, it))
+setiparams!(f::Function, x::AbstractBlock, it::Symbol) =
+    setiparams!(f, x, render_params(x, it))
 
 """
     parameters(block)
@@ -286,7 +290,7 @@ Pop the first [`nparameters`](@ref) parameters of list, map them with a function
 `f`, then dispatch them to the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(f::Function, x::AbstractBlock, list::Vector)
-    setiparams!(f, x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(f, x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(f, each, list)
     end
@@ -300,7 +304,7 @@ Pop the first [`nparameters`](@ref) parameters of list, then dispatch them to
 the block tree `block`. See also [`dispatch!`](@ref).
 """
 @interface function popdispatch!(x::AbstractBlock, list::Vector)
-    setiparams!(x, (popfirst!(list) for k in 1:niparams(x))...)
+    setiparams!(x, (popfirst!(list) for k = 1:niparams(x))...)
     for each in subblocks(x)
         popdispatch!(each, list)
     end
@@ -309,8 +313,9 @@ end
 
 render_params(r::AbstractBlock, params) = params
 render_params(r::AbstractBlock, params::Symbol) = render_params(r, Val(params))
-render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i in 1:niparams(r))
-render_params(r::AbstractBlock, ::Val{:zero}) = (zero(iparams_eltype(r)) for i in 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:random}) = (rand() for i = 1:niparams(r))
+render_params(r::AbstractBlock, ::Val{:zero}) =
+    (zero(iparams_eltype(r)) for i = 1:niparams(r))
 
 """
     HasParameters{X} <: SimpleTraits.Trait
