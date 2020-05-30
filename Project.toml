@@ -32,7 +32,7 @@ StaticArrays = "0.12"
 StatsBase = "0.32, 0.33"
 TupleTools = "1.2"
 YaoArrayRegister = "0.6.0"
-YaoBase = "0.13"
+YaoBase = "0.13, 0.14"
 julia = "1"
 
 [extras]
