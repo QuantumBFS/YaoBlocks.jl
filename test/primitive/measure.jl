@@ -10,6 +10,7 @@ using StatsBase: mean
     # should collapse to 0000 or 1111 since entangled
     g = Measure(4; locs = (1, 2))
     st |> g
+    @test (copy(st) |> g) isa ArrayReg
 
     @test g.results[1] == 0 ? st.state[end] == 0 : st.state[1] == 0
     g = Measure(4; locs = (1, 2), resetto = 2)

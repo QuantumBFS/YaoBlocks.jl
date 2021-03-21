@@ -37,7 +37,7 @@ and convenient for large blocks.
 
 ```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> r = rand_state(3)
-ArrayReg{1, Complex{Float64}, Array...}
+ArrayReg{1, ComplexF64, Array...}
     active qubits: 3/3
 
 julia> apply!(copy(r), subroutine(X, 1)) ≈ apply!(copy(r), put(1=>X))
@@ -48,7 +48,7 @@ It works for in-contigious locs as well
 
 ```jldoctest; setup=:(using YaoBlocks; using YaoArrayRegister)
 julia> r = rand_state(4)
-ArrayReg{1, Complex{Float64}, Array...}
+ArrayReg{1, ComplexF64, Array...}
     active qubits: 4/4
 
 julia> cc = subroutine(4, kron(X, Y), (1, 3))

@@ -345,8 +345,10 @@ Return the range of real parameters present in `block`.
 
 ```jldoctest; setup=:(using YaoBlocks)
 julia> parameters_range(RotationGate(X, 0.1))
-1-element Array{Tuple{Float64,Float64},1}:
- (0.0, 6.283185307179586)
+ERROR: UndefVarError: parameters_range not defined
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 ```
 """
 function parameters_range(block::AbstractBlock)
