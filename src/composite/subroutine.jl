@@ -89,10 +89,9 @@ occupied_locs(c::Subroutine) = map(i -> c.locs[i], c.content |> occupied_locs)
 chsubblocks(pb::Subroutine{N}, blk::AbstractBlock) where {N} = Subroutine{N}(blk, pb.locs)
 PreserveTrait(::Subroutine) = PreserveAll()
 
-function apply!(r::AbstractRegister, c::Subroutine)
-    _check_size(r, c)
+function _apply!(r::AbstractRegister, c::Subroutine)
     focus!(r, c.locs)
-    apply!(r, c.content)
+    _apply!(r, c.content)
     relax!(r, c.locs, to_nactive = nqubits(c))
     return r
 end

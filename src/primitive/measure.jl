@@ -161,8 +161,7 @@ Measure(;
 )
 mat(x::Measure) = error("use BlockMap to get its matrix.")
 
-function apply!(r::AbstractRegister, m::Measure{N}) where {N}
-    _check_size(r, m)
+function _apply!(r::AbstractRegister, m::Measure{N}) where {N}
     m.results = measure!(m.postprocess, m.operator, r, m.locations; rng = m.rng)
     return m
 end

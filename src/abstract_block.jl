@@ -5,8 +5,12 @@ using YaoBase, YaoArrayRegister, SimpleTraits
 
 Apply a block (of quantum circuit) to a quantum register.
 """
+function apply!(r::AbstractRegister, @nospecialize(b::AbstractBlock))
+    _check_size(r, b)
+    _apply!(r, b)
+end
 
-function apply!(r::AbstractRegister, b::AbstractBlock)
+function _apply!(r::AbstractRegister, b::AbstractBlock)
     _apply_fallback!(r, b)
 end
 
@@ -14,7 +18,6 @@ _apply_fallback!(r::AbstractRegister, b::AbstractBlock) =
     throw(NotImplementedError(:_apply_fallback!, (r, b)))
 
 function _apply_fallback!(r::ArrayReg{B,T}, b::AbstractBlock) where {B,T}
-    _check_size(r, b)
     r.state .= mat(T, b) * r.state
     return r
 end
