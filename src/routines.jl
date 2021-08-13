@@ -47,6 +47,14 @@ end
     return N + (1 << (nbits - log2dim1(U))) * (length(U) - size(U, 2))
 end
 
+@inline function num_nonzero(nbits::Int, nctrls::Int, U::SDSparseMatrixCSC, N::Int = 1 << nbits)
+    return N + (1 << (nbits - nctrls - log2dim1(U))) * (nnz(U) - size(U, 2))
+end
+
+@inline function num_nonzero(nbits::Int, U::SDSparseMatrixCSC, N::Int = 1 << nbits)
+    return N + (1 << (nbits - log2dim1(U))) * (nnz(U) - size(U, 2))
+end
+
 """
     getcol(csc::SDparseMatrixCSC, icol::Int) -> (View, View)
 
