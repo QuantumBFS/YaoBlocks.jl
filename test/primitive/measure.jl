@@ -113,4 +113,10 @@ end
     c = count(!iszero, reg.state)
     @test (c == 4 && res ≈ 1) || (c == 2 && res == -1)
     @test isnormalized(reg)
+
+    # measure zero space
+    reg = ArrayReg(ComplexF64[1.0])
+    res = measure!(matblock(fill(3.0+0im, 1, 1)), reg)
+    @test res ≈ 3.0
+    @test reg == zero_state(0)
 end

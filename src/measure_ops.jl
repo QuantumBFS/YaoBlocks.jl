@@ -116,6 +116,10 @@ function measure!(
     return res
 end
 
+# `BlockedBasis` is for measuring operators on its eigen basis, where a `block` is a subspace with the same eigenvalue.
+# * `perm` is the permutation that permute the basis by the ascending order of eigenvalues,
+# * `values` are eigenvalues of target observable for each block,
+# * `block_ptr` is the pointers for blocks, e.g. to index block `i`, one can use `block_ptr[i]:block_ptr[i-1]`, or `subblock(blockbasis, i)` for short.
 struct BlockedBasis{VT}
     perm::Vector{Int}
     values::VT
