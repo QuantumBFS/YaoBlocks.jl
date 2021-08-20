@@ -168,13 +168,13 @@ function YaoBase.measure!(
         end
     end
     res = Vector{Int}(undef, B)
-    @inbounds for ib = 1:B
-        ires = sample(rng, 1:nblocks(bb), Weights(view(pl_block,:,ib)))
+    @inbounds @views for ib = 1:B
+        ires = sample(rng, 1:nblocks(bb), Weights(pl_block[:,ib]))
         # notice ires is `BitStr` type, can be use as indices directly.
         range = subblock(bb,ires)
-        view(state,range,:,ib) ./= sqrt(pl_block[ires, ib])
-        view(state,1:range.start-1,:,ib) .= zero(T)
-        view(state,range.stop+1:size(state,1),:,ib) .= zero(T)
+        state[range,:,ib] ./= sqrt(pl_block[ires, ib])
+        state[1:range.start-1,:,ib] .= zero(T)
+        state[range.stop+1:size(state,1),:,ib] .= zero(T)
         res[ib] = ires
     end
     # undo permute and assign back
