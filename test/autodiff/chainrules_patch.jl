@@ -1,6 +1,6 @@
 import Zygote, ForwardDiff
 using Random, Test
-using Yao
+using YaoBlocks, YaoArrayRegister
 
 @testset "rules" begin
     h = put(5, 3=>Z) + put(5, 2=>X)
@@ -17,7 +17,7 @@ using Yao
     @test Zygote.gradient(x->real(sum(abs2, state(x'))), r)[1].state ≈ g1
     @test Zygote.gradient(x->real(sum(abs2, statevec(x'))), r)[1].state ≈ g1
     # fucking zygote does not work if `sin` is not here,
-    # because it gives an adjoint of different type as output matrix type.
+    # because it gives an adjoint of different type as the output matrix type.
     # do not modify the data type please! Zygote
     @test Zygote.gradient(x->real(sum(sin, Matrix(x))), c)[1] ≈ ForwardDiff.gradient(x->real(sum(sin, Matrix(dispatch(c, x)))), parameters(c))
 end
