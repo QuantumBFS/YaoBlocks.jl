@@ -45,10 +45,6 @@ function rrule(::typeof(expect), op::AbstractBlock, reg_and_circuit::Pair{<:Arra
     end
 end
 
-#function rrule(::Type{PT}, reg::ArrayReg{B}, circ::AbstractBlock) where {B,PT<:Pair}
-    #Pair(reg, circ), outδ->(NoTangent(), outδ.first, outδ.second)
-#end
-
 function rrule(::Type{T}, block::AbstractBlock) where T<:Matrix
     out = T(block)
     out, function (outδ)
