@@ -41,6 +41,7 @@ for GT in [:ChainBlock, :Add, :KronBlock, :RepeatedBlock, :PutBlock, :Subroutine
 end
 
 extract_circuit_gradients!(c::Number, output) = push!(output, c)
+extract_circuit_gradients!(::Nothing, output) = output
 extract_circuit_gradients!(::NoTangent, output) = output
 extract_circuit_gradients!(::ZeroTangent, output) = output
 function extract_circuit_gradients!(c::AbstractVector, output)
@@ -51,6 +52,12 @@ function extract_circuit_gradients!(c::AbstractVector, output)
 end
 function extract_circuit_gradients!(c::Tangent, output)
     for fn in getfield(c, :backing)
+        extract_circuit_gradients!(fn, output)
+    end
+    return output
+end
+function extract_circuit_gradients!(c::NamedTuple, output)
+    for fn in c
         extract_circuit_gradients!(fn, output)
     end
     return output
@@ -75,8 +82,6 @@ end
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
     out = dispatch(block, params)
     out, function (outδ::AbstractTangent)
-        #δ= getfield(outδ,:backing)
-        #g = extract_circuit_gradients!(Tangent{typeof(block),typeof(δ)}(δ), empty(params))
         g = extract_circuit_gradients!(outδ, empty(params))
         res = (NoTangent(), NoTangent(), g)
         return res
