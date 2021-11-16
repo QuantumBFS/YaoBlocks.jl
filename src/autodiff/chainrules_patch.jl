@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import ChainRulesCore: rrule, @non_differentiable, NoTangent, Tangent, backing, AbstractTangent, ZeroTangent
 
 function create_circuit_tangent(circuit, params)
@@ -56,47 +55,31 @@ function extract_circuit_gradients!(c::Tangent, output)
     end
     return output
 end
-=======
-import ChainRulesCore: rrule, @non_differentiable, NoTangent, Tangent
->>>>>>> master
 
 function rrule(::typeof(apply), reg::ArrayReg, block::AbstractBlock)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block)
-<<<<<<< HEAD
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
-=======
-        return (NoTangent(), inδ, dispatch(block, paramsδ))
->>>>>>> master
     end
 end
 function rrule(::typeof(apply), reg::ArrayReg, block::Add)
     out = apply(reg, block)
     out, function (outδ)
         (in, inδ), paramsδ = apply_back((copy(out), outδ), block; in = reg)
-<<<<<<< HEAD
         return (NoTangent(), inδ, create_circuit_tangent(block, paramsδ))
-=======
-        return (NoTangent(), inδ, dispatch(block, paramsδ))
->>>>>>> master
     end
 end
 
 
 function rrule(::typeof(dispatch), block::AbstractBlock, params)
     out = dispatch(block, params)
-<<<<<<< HEAD
     out, function (outδ::AbstractTangent)
         #δ= getfield(outδ,:backing)
         #g = extract_circuit_gradients!(Tangent{typeof(block),typeof(δ)}(δ), empty(params))
         g = extract_circuit_gradients!(outδ, empty(params))
         res = (NoTangent(), NoTangent(), g)
         return res
-=======
-    out, function (outδ)
-        (NoTangent(), NoTangent(), parameters(outδ))
->>>>>>> master
     end
 end
 
@@ -118,11 +101,7 @@ function rrule(::typeof(expect), op::AbstractBlock, reg_and_circuit::Pair{<:Arra
         for b in 1:B
             viewbatch(greg, b).state .*= 2 * outδ[b]
         end
-<<<<<<< HEAD
         return (NoTangent(), NoTangent(), Tangent{typeof(reg_and_circuit)}(; first=greg, second=create_circuit_tangent(reg_and_circuit.second, gcircuit)))
-=======
-        return (NoTangent(), NoTangent(), Tangent{typeof(reg_and_circuit)}(; first=greg, second=dispatch(reg_and_circuit.second, gcircuit)))
->>>>>>> master
     end
 end
 
@@ -130,11 +109,7 @@ function rrule(::Type{T}, block::AbstractBlock) where T<:Matrix
     out = T(block)
     out, function (outδ)
         paramsδ = mat_back(block, outδ)
-<<<<<<< HEAD
         return (NoTangent(), create_circuit_tangent(block, paramsδ))
-=======
-        return (NoTangent(), dispatch(block, paramsδ))
->>>>>>> master
     end
 end
 
@@ -142,11 +117,7 @@ function rrule(::typeof(mat), ::Type{T}, block::AbstractBlock) where T
     out = mat(T, block)
     out, function (outδ)
         paramsδ = mat_back(block, outδ)
-<<<<<<< HEAD
         return (NoTangent(), NoTangent(), create_circuit_tangent(block, paramsδ))
-=======
-        return (NoTangent(), NoTangent(), dispatch(block, paramsδ))
->>>>>>> master
     end
 end
 
