@@ -23,7 +23,7 @@ A module contains all constant gate definitions.
 """
 module ConstGate
 import ..YaoBlocks
-export ConstantGate, PauliGate
+export ConstantGate, PauliGate, N, NGate
 
 """
     ConstantGate{N, T} <: PrimitiveBlock{N, T}
@@ -38,6 +38,8 @@ include("const_gate_tools.jl")
 include("const_gate_gen.jl")
 
 const PauliGate = Union{I2Gate,XGate,YGate,ZGate}
+const N = P1
+const NGate = P1Gate
 
 YaoBlocks.cache_key(x::ConstantGate) = 0x1
 
